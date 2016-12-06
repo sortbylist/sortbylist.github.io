@@ -1,17 +1,16 @@
 ---
-title: Dagger2详解
+title: Dagger2详解1
 date: 2016-10-03 12:03:33
-tags: android Dagger2 依赖注入
+tags: [android,Dagger2,依赖注入]
 ---
 
-# Dagger2详解1
 看了许多Dagger2的文章，主要包括：
 
 - [Android：dagger2让你爱不释手系列 ](http://www.jianshu.com/p/cd2c1c9f68d4)
 - [Dagger2图文完全教程](https://github.com/luxiaoming/dagger2Demo)
 
 
-但感觉有些地方还是没整明白。因此我也来写一篇Dagger2的文章，供大家交流学习。
+但感觉有的文章光有原理没有例子，有的光讲例子，原理又讲的比较少。因此我也来写一篇Dagger2的文章，尽量结合2者，供大家交流学习。
 ### @Inject、@Qualifier
 
 如果我们项目中自己定义的类，比如User类，需要注入到MainActivity中，用来代替`new User()`，那么在User类中使用@Inject注解User的构造函数表示提供注入，@Inject注解MainActivity中User类的实例属性来表示注入处。
@@ -80,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
   @Named("user_with_value")
   User userWithValue;
 }
-
 ```
 
 ### @Module、@Component和@Provides
@@ -92,8 +90,8 @@ Module的引入是为了解决第三库提供的实例注入问题，比如User�
 我们选择以页面切分Module，以下Module中提供的依赖供MainActivity页面使用
 
 ```java
-//MainModule
-@MainModule
+//MainActivityModule.java
+@Module
 public class MainActivityModule {
   //返回值表示提供User类的实例注入，Dagger2官方推荐providerXX作方法名
   //如果是在Module中提供多个相同返回类型，也需要用到@Qualified注解过的注解来区分
@@ -115,17 +113,17 @@ public class MainActivityModule {
 
 如果通过@Inject和@Module都有提供User类的注入依赖，按照Dagger2的处理，优先使用@Module类中提供的注入。
 
-如果User类仅在MainModule类中有定义提供注入的方法，那么在MainActivity.java类中@Inject的属性如何初始化呢？这时候Dagger2提供@Component类来关联：
+如果User类仅在MainActivityModule类中有定义提供注入的方法，那么在MainActivity.java类中@Inject的属性如何初始化呢？这时候Dagger2提供@Component类来关联：
 
 ```java
 //MainActivityComponent.java
-//定义module值来表示MainComponent可以提供MainModule中的注入
-@Component(module = MainModule.java) 
+//定义module值来表示MainComponent可以提供MainActivityModule中的注入
+@Component(module = MainActivityModule.class) 
 public interface MainActivityComponent {
   //Dagger2推荐injectXX(Object)方法来定义Component要注入的地方
   //Dagger2通过自动生成代码，把MainActivity中要注入的实例，
-  //与MainModule中提供的实例初始化方法相关联
-  //相当于User user[MainActivity提供] = new User()[MainModule提供]
+  //与MainActivityModule中提供的实例初始化方法相关联
+  //相当于User user[MainActivity提供] = new User()[MainActivityModule提供]
   void inject(MainActivity mainActivity);
 }
 ```
@@ -137,7 +135,7 @@ public interface MainActivityComponent {
 public class MainActivity extends AppCompatActivity {
   @Inject
   @Named("user")
-  User user; //从MainModule中注入
+  User user; //从MainActivityModule中注入
 
   MainActivityComponent mainComponent; //Component需要初始化
 
@@ -168,8 +166,8 @@ public class MainActivity extends AppCompatActivity {
 下一篇会再讲Dagger2复杂一点的用法。包括
 - 多个@Component间的依赖
 ```java
-@Component(dependencies = ApplicationComponent.class,
-           modules ={MyModule2.class,ModuleB.class,ModuleA.class,MyModule.class})
+@Component(dependencies = MainApplicationComponent.class,
+           modules ={MainActivityModule.class,ModuleB.class,ModuleA.class,MyModule.class})
 ```
 - 子Component`@SubComponent`
 - 作用域`@Scope`
