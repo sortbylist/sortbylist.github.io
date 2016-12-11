@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
 ### @Module、@Component和@Provides
 
-Module的引入是为了解决第三库提供的实例注入问题，比如User类是某个第三方库的文件，那么我们没办法在其构造函数上增加@Inject注解。这时候可以通过@Module注解的类中以@Providers注解相应返回类型为User的方法来提供实例
+Module的引入是为了解决第三库提供的实例注入问题，比如User类是某个第三方库的文件，那么我们没办法在其构造函数上增加@Inject注解。这时候可以通过@Module注解的类中以@Provides注解相应返回类型为User的方法来提供实例
 
 **如果你原先的代码现在需要引入Dagger2，也可以通过@Module方式来提供注入，这样基本不用修改原有代码，另外可以把<u>`某个页面`</u>需要注入的实例全部在Module类中提供，也方便维护。而这里的<u>`某个页面`</u>具体要怎么划分，是单个activity或者单个功能，就看情况而定了，目前大多数推荐是以页面来划分Module**
 
@@ -95,15 +95,15 @@ Module的引入是为了解决第三库提供的实例注入问题，比如User�
 public class MainActivityModule {
   //返回值表示提供User类的实例注入，Dagger2官方推荐providerXX作方法名
   //如果是在Module中提供多个相同返回类型，也需要用到@Qualified注解过的注解来区分
-  @Provider
+  @Provides
   @Named("user")
   public User providerUser() {
     return new User();
   }
 
-  //这里的参数类型为String，如果有@Provider注解的方法返回值为String，就会被自动注入，
+  //这里的参数类型为String，如果有@Provides注解的方法返回值为String，就会被自动注入，
   //因此这里比较好的提供参数呢？？我也不知道[摊手]
-  @Provider
+  @Provides
   @Named("user_with_value") 
   public User providerValueableUser(String name, String pwd) {
     return new User(name, pwd);
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
 2. @Inject注解在`需要注入`处；
 
-   @Module通过@Provider`提供注入`；
+   @Module通过@Provides`提供注入`；
 
    @Component在`需要注入页面`处初始化，来连接@Inject和@Module
 
