@@ -74,3 +74,36 @@ deploy:
   repo: https://github.com/sortbylist/sortbylist.github.io.git
 sitemap:
     path: sitemap.xml
+
+#hexo-filter-cleanup options
+#See https://github.com/mamboer/hexo-filter-cleanup
+hfc_img:
+  enable: false
+  interlaced: false
+  multipass: false
+  optimizationLevel: 2
+  pngquant: false
+  progressive: false
+  webp: true
+  webpQuality: 75
+  gifslice: true
+  jpegtran: true
+  jpegrecompress: false
+  jpegrecompressQuality: 'medium'
+  optipng: true
+  svgo: true
+
+hfc_favicons:
+  enable: false
+  src: /favicon.ico
+  target: /source/
+  icons:
+    android: true
+    appleIcon: true
+    appleStartup: false
+    coast: false
+    favicons: true
+    firefox: false
+    opengraph: false
+    windows: true
+    yandex: false
