@@ -1,0 +1,36 @@
+language: node_js
+node_js: stable
+
+# S: Build Lifecycle
+install:
+  - git clone https://github.com/iissnan/hexo-theme-next themes/next
+  - cp themes/_config.yml themes/next/_config.yml
+  - npm install hexo-cli -g
+  - npm install
+
+
+#before_script:
+ # - npm install -g gulp
+cache:
+  directories:
+    - node_modules
+    
+script:
+  - hexo g
+
+after_script:
+  - cd ./public
+  - git init
+  - git config user.name "jerry"
+  - git config user.email "jerrylee2016@foxmail.com"
+  - git add .
+  - git commit -m "Update docs"
+  - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master
+# E: Build LifeCycle
+
+branches:
+  only:
+    - source
+env:
+ global:
+   - GH_REF: github.com/sortbylist/sortbylist.github.io.git
