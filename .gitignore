@@ -6,3 +6,5 @@ node_modules/
 public/
 .deploy*/
 debug.log
+.idea/
+themes/next/

@@ -3,7 +3,7 @@ node_js: stable
 
 # S: Build Lifecycle
 install:
-  - git clone https://github.com/iissnan/hexo-theme-next themes/next
+  - git clone -b v7.0.1 https://github.com/theme-next/hexo-theme-next themes/next
   - cp themes/_config.yml themes/next/_config.yml
   - npm install hexo-cli -g
   - npm install
