@@ -1,7 +1,7 @@
 ---
 title: jdk7与mysql的连接问题
 date: 2014-04-23 12:51:37
-tags: [java,mysql]
+tags: [Java,mysql]
 ---
 
 今天第一天上班，工作就是熟悉一下环境。
