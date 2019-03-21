@@ -168,6 +168,8 @@ tags: [Java]
 - Unicode编码，使用“U+”然后紧接着一组十六进制的数字表示一个字符。从U+0000到U+FFFF的字符集被称作*Basic Multilingual Plane(BMP)*，又称作`零号平面`，其中的所有字符，要用四个数字（即2个char，16bit，例如U+4AE0，共支持2^16-1=65535个字符）；在零号平面以外的字符则需要使用五个或六个数字，范围为U+0000到U+10FFFF，即通常所说的*Unicode标准量*。
 - java.lang.Math、java.util.Date、java.text.SimpleDateFormat、java.text.NumberFormat、java.text.MessageFormat、java.util.Calendar、java.util.GregorianCalendar
 
+<!-- more -->
+
 
 ### Java正则表达式
 

@@ -63,6 +63,9 @@ tags: [Hyper,Zsh]
   
   shellArgs: ['--login', '-i', '/c wsl'], <----------------- shellArgs: ['--login'],
   ```
+
+<!-- more -->
+
 ### Linux配置Zsh 
 
 - 安装zsh 

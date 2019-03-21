@@ -168,7 +168,7 @@ FileChannel无法设置为非阻塞模式，它总是运行在阻塞模式下。
   int bytesWritten = channel.write(buf);
   ```
 
-  ​
+<!-- more -->  
 
 #### ByteBuffer
 
@@ -606,7 +606,7 @@ SelectionKye由Channel向Selector注册后返回，包含以下属性：`interes
   sourceChannel.read(buf); //读取通道数据
   ```
 
-  ​
+  
 
 #### Java NIO和IO
 
