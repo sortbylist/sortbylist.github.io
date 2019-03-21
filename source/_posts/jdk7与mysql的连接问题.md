@@ -18,7 +18,7 @@ has not received any packets from the server.
 
 然后我就开始一下午的逐个排查。
 
-   **整个结构：**
+**整个结构：**
 
 - IDE问题
 - tomcat问题
@@ -29,9 +29,9 @@ has not received any packets from the server.
 **解决：**
 
 1. IDE用的MyEclipse，于是下个Eclipse for JavaEE,运行结果依旧。
-   1. tomcat版本7.0,不管这个，直接写个java类，在main方法里通过jdbc连接mysql，这样代码的问题也排除了。运行结果还是一样报错。
-   2. 从官网下载最新的connector/J驱动，加载，还是有问题。
-   3. mysql用的32位5.5版本，但系统是64位的，虽然通过IDE运行代码报错，但第三方工具比如navicat for mysql可以连接到本地mysql,用命令行也可以。暂时不管，再下64位5.5版本mysql。运行代码还是报错。
+2. tomcat版本7.0,不管这个，直接写个java类，在main方法里通过jdbc连接mysql，这样代码的问题也排除了。运行结果还是一样报错。
+3. 从官网下载最新的connector/J驱动，加载，还是有问题。
+4. mysql用的32位5.5版本，但系统是64位的，虽然通过IDE运行代码报错，但第三方工具比如navicat for mysql可以连接到本地mysql,用命令行也可以。暂时不管，再下64位5.5版本mysql。运行代码还是报错。
 
 这个就没辙了。环境基本都换新了。也不会出现wait_timeout参数这一类问题。
 

@@ -5,22 +5,22 @@ tags: android
 ---
 1. ### 按钮点击事件监听方式
   - 匿名内部类监听
-    <pre><code>
+    ```java
     btn.setOnclickListener(new OnClickListener() {
-    });</code></pre>
+    });```
 
  - 外部类监听
 
-    <pre><code>
+    ```java
     btn.setOnclickListener(myListener);  
 
     class myListener implements OnClickListener {
     }
-    </code></pre>
+    ```
 
   - 实现接口监听
 
-     <pre><code>
+     ```java
        public class MainActivity extends Activity
           implements OnclickListener {
             @Override
@@ -28,10 +28,10 @@ tags: android
             }
         }
         btn.setOnClickListener(this);
-    </code></pre>
+    ```
 
 2. ### dp/dip/sp/px区别  
- 
+
 3. ### AutoCompleteTextView/MultiAutoCompleteTextView  
 
 4. ### ToggleButton  

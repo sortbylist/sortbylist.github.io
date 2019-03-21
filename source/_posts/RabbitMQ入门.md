@@ -14,7 +14,7 @@ tags: [Rabbitmq]
 
 - 原理图
 
-  ![rabbitmq](/images/Rabbitmq.png)
+  ![rabbitmq](/images/rabbitmq.png)
 
 
 - 概念

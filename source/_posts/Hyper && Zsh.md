@@ -14,9 +14,9 @@ tags: [Hyper,Zsh]
 
   修改`.hyper.js` 里面 TermCSS 改成：`termCSS: '.wc-node{width: 16px !important}'`，或者`termCSS: '.wc-node.unicode-node{width: 1em}'`,后面一种修改更推荐
 
- - hyper-material-theme
+- hyper-material-theme
 
-   修改`.hyper.js`以下内容：
+  修改`.hyper.js`以下内容：
   ```js
      plugins: ['hyper-material-theme'],
 
