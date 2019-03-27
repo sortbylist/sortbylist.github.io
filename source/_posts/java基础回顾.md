@@ -753,7 +753,7 @@ Collection<V> values();
 
 #### **LinkedHashMap 与 LRUcache**
 
-由于LinkedHashMap支持设置`accessOrder`为true后，通过访问顺序来排序元素，因此可以实现**LRUcache( Last Recent Use cache最后访问缓存)**，
+由于LinkedHashMap支持设置`accessOrder`为true后，通过访问顺序来排序元素，因此可以实现**LRUcache( Last Recent Use cache最后访问缓存)**。
 
 ### WeakHashMap
 
@@ -910,18 +910,6 @@ SortedSet<E>              tailSet(E start)；
 - HastSet 和 TreeSet 是Set的两个实现类。
   - HashSet依赖于HashMap，它实际上是通过HashMap实现的。HashSet中的元素是无序的。
   - TreeSet依赖于TreeMap，它实际上是通过TreeMap实现的。TreeSet中的元素是有序的。
-
-### **ConcurrentHashMap**
-
-- HashMap是非线程安全的，当出现其他线程写入时，当前读取线程会抛出ConcurrentModificationException。
-
-- HashTable或者Collections.synchronizedMap(hashMap)是对整个hash表结构做锁定操作，性能不高
-
-- ConcurrentHashMap依赖于Java内存模型（显式同步，隐式通信），使用分离锁实现多个线程间的更深层的共享访问。通过对同一个volatile变量的写/读访问，协调不同线程间读/写操作的内存可见性。
-
-- > 正是因为其内部的结构以及机制，所以 ConcurrentHashMap 在并发访问的性能上要比HashTable和同步包装之后的HashMap的性能提高很多。在理想状态下，ConcurrentHashMap 可以支持 16 个线程执行并发写操作（如果并发级别设置为 16），及任意数量线程的读操作。
-
-
 
 # Java Network
 
