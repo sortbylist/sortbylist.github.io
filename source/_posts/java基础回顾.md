@@ -155,14 +155,35 @@ name=dogName;
 
 # Java序列化
 
-- java.io.Serializable
+## 定义
+
+序列化，就是为了保存对象的状态，与之对应的是反序列化，就是把保存的对象状态再读出来。
+
+> 序列化/反序列化，是Java提供一种专门用于保存/恢复对象状态的机制。
+
+一般以下几种情况下，我们可能会用到序列化：
+
+- 想把内存中的对象状态保存到一个文件中或数据库中
+- 想用套接字在网络上传送对象
+- 想通过**RMI ( Remote Method Invocation 远程连接调用 )** 传输对象时
+
+## `java.io.Serializable`
+
+类通过实现`Serializable`接口，可实现自动序列化
+
 - transient瞬态，用于不序列化的属性
 - 静态变量，属于类的状态，不序列化
-- writeObject(java.io.ObjectOutputStream o)/readObject(java.io.ObjectInputStream o)
-- java.io.Externalizable
-  - `writeExternal(ObjectOutput out)`
-  - `readExernal(ObjectInput in)`
-- readResolve/writeReplace可以用在单例模式时的序列化和反序列化，用于指定替代的对象
+- 如果想自定义序列化的内容，类中需要实现`writeObject(java.io.ObjectOutputStream o)`/`readObject(java.io.ObjectInputStream o)`方法，分别用于序列化和反序列化。自定义方法第一行可调用`out.defaultWriteObject()`/`out.defaultReadObject()`来调用jdk的默认序列化，然后再实现自己的序列化
+
+## `java.io.Externalizable`
+
+如果一个类要完全负责自己的序列化，则实现 Externalizable 接口，而不是 Serializable 接口。
+
+> Externalizable接口定义包括两个方法`writeExternal()`与`readExternal()`。需要注意的是：声明类实现Externalizable接口会有重大的安全风险。`writeExternal()`与`readExternal()`方法声明为public，恶意类可以用这些方法读取和写入对象数据。如果对象包含敏感信息，则要格外小心。
+
+- `writeExternal(ObjectOutput out)`
+- `readExernal(ObjectInput in)`
+- `readResolve`/`writeReplace`可以用在单例模式时的序列化和反序列化，用于指定替代的对象
 
 # Java基本数据结构
 
