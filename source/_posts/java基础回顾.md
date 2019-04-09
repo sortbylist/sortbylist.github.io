@@ -400,7 +400,10 @@ matcher.appendTail(sb); //将最后matcher中最后剩余的内容附加到Strin
 
 # Java异常处理
 
+![Java异常类图](/images/java_exception_struct.jpg)
+
 - Throwable
+
   - Error
     错误，是程序无法处理的错误，表示运行应用程序中较严重问题。属于不可检测的异常（Unchecked Excepiton)
   - Exception
@@ -409,6 +412,7 @@ matcher.appendTail(sb); //将最后matcher中最后剩余的内容附加到Strin
       可检测异常通常是用户错误或是程序员可预计的，需要在编译时处理，一般用try-catch语句捕获或者用throws子句声明抛出。
     - RuntimeException
       运行时异常程序可以选择捕获处理，也可以不处理，这些异常一般是由程序逻辑错误引起的，程序应该从逻辑角度尽可能避免这类异常的发生。属于不可检测的异常（Unchecked Excepiton)。
+
 
 # Java集合
 
