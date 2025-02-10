@@ -109,5 +109,6 @@ theme: next
 deploy:
   type: git
   repo: https://github.com/sortbylist/sortbylist.github.io.git
+  branch: gh-pages
 sitemap:
     path: sitemap.xml
