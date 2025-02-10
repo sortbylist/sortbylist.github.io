@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="以下笔记内容来自《PHP与MySQL动态网站开发（第4版）》   对于几乎所有的数据库应用程序都是如此： 文本(即字符串) 数字 日期和时间   存储为CHAR的任何内容将总是被存储为具有列长度的字符串（使用空格填充它；在从数据库中检索存储的值时将删除这些空格）。 如果你在使用非整形时需要绝对精度，DECIMAL要比FLOAT和DOUBLE合适。 当发生INSERT或UPDATE时，会自动把TI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql基础笔记">
+<meta property="og:url" content="http://sortbylist.github.io/2014/05/11/mysql%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="以下笔记内容来自《PHP与MySQL动态网站开发（第4版）》   对于几乎所有的数据库应用程序都是如此： 文本(即字符串) 数字 日期和时间   存储为CHAR的任何内容将总是被存储为具有列长度的字符串（使用空格填充它；在从数据库中检索存储的值时将删除这些空格）。 如果你在使用非整形时需要绝对精度，DECIMAL要比FLOAT和DOUBLE合适。 当发生INSERT或UPDATE时，会自动把TI">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-05-11T08:22:38.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.513Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sortbylist.github.io/2014/05/11/mysql%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mysql基础笔记 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2014/05/11/mysql%E5%9F%BA%E7%A1%80%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql基础笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2014-05-11 16:22:38" itemprop="dateCreated datePublished" datetime="2014-05-11T16:22:38+08:00">2014-05-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>以下笔记内容来自《PHP与MySQL动态网站开发（第4版）》</p>
+</blockquote>
+<ol>
+<li>对于几乎所有的数据库应用程序都是如此：<ul>
+<li>文本(即字符串)</li>
+<li>数字</li>
+<li>日期和时间</li>
+</ul>
+</li>
+<li>存储为<code>CHAR</code>的任何内容将总是被存储为具有列长度的字符串（使用空格填充它；在从数据库中检索存储的值时将删除这些空格）。</li>
+<li>如果你在使用非整形时需要绝对精度，<code>DECIMAL</code>要比<code>FLOAT</code>和<code>DOUBLE</code>合适。</li>
+<li>当发生<code>INSERT</code>或<code>UPDATE</code>时，会自动把<code>TIMESTAMP</code>字段类型设置成当前日期和时间，即使没有为那个特定的字段指定任何值。如果一张表具有多个<code>TIMESTAMP</code>列，那么在执行<code>INSERT</code>或<code>UPDATE</code>时，只会更新其中的第一个列。</li>
+<li><code>DESCRIBE tablename</code>语句与<code>SHOW COLUMNS FROM tablename</code>语句等价。</li>
+<li>当在SQL语句中使用任何函数时，不要用引号括住它。</li>
+<li>你偶尔会在SQL命令中看到使用反绰号(&#96;)。这个字符与波浪符(~)是同一个键，它与单引号不同。反引号用来安全地引用可能与已存在的MySQL关键词重复的表名或列名。</li>
+<li><code>INSERT</code>中一个有意思的变化是<code>REPLACE</code>。<code>REPLACE</code>语句的作用是，如果使用的表的主键或唯一索引的值已经存在，那么<code>REPLACE</code>会更新存在的行；如果不存重复则会同<code>INSERT</code>一样插入新行。</li>
+<li>MySQL支持关键字<code>TRUE</code>与<code>FALSE</code>，不区分大小写。在内部，<code>TRUE</code>等于1而<code>FALSE</code>等于0。因此，<code>TRUE+TRUE=2</code>。</li>
+<li>带有<code>LIKE</code>条件语句的查询一般比较慢，因为它们不能利用索引，所以仅当绝对需要时才应该使用这种格式。</li>
+<li>为了在<code>LIKE</code>或<code>NOT LIKE</code>查询中使用原意的下划线或百分号，需要对它们进行转义（在字符前放置一个反斜杠），使得不会把它们与通配符相混淆。</li>
+<li><code>FULLTEXT</code>查找通常比<code>LIKE</code>查询要好一些。</li>
+<li>如果有一个gender列，定义为<code>ENUM(&#39;M&#39;,&#39;F&#39;)</code>，子句<code>ORDER BY gender</code>返回的结果是M记录在前。</li>
+<li>应该从来都不需要在主键列上执行一个<code>UPDATE</code>，因为这个值应该从不发生变化。更改主键的值可能造成严重的后果。</li>
+<li>即使<code>SELECT</code>查询只返回一行，也要格外小心，将<code>LIMIT 1</code>子句添加到DELETE查询中。</li>
+<li>如果创建的主键没有任何其他意义和目的，就称其为<code>代理主键</code>。</li>
+<li>MySQL只允许每个表有一个主键，虽然你可以让主键基于多列（这表示这些列的组合必须唯一且永远不变）。</li>
+<li>理想情况下，主键应该是整数，使MySQL性能更佳。</li>
+<li>第一范式(1NF):<br>- 每一列必须仅包含一个值（有时候这被描述为<code>原子性</code>或<code>不可分割性</code>);<br>- 所有表都不能具有相关数据的重复列。</li>
+<li>如果内联结中引用的列值为NULL，则永远不会有返回值，因为没有值会匹配NULL，包括NULL。</li>
+<li>左联结要考虑的最重要的内容是首先指定哪个表。</li>
+<li>SQL可以执行<code>自联结</code>：让表自己联结自己。</li>
+<li>你可以通过<code>database.table.column</code>语法跨库执行联结，条件是所有数据库都在同一服务器上（不能跨网络），并且使用联结的用户需要有权限访问所有涉及的表。</li>
+<li><code>NULL</code>是一个特殊的值，有趣的是<code>GROUP BY</code>将会<code>NULL</code>值分到同一组，因为他们有相同的空值。</li>
+<li>另一个相关的子句是<code>HAVING</code>，它类似竽一个组的WHERE条件。</li>
+<li>不能将<code>SUM()</code>和<code>AVG()</code>直接应用于日期或日间值。你需要将日期和时间值转换为秒，执行<code>SUM()</code>和<code>AVG()</code>函数，并且然后将这个值换回日期和时间。</li>
+<li><code>IFNULL()</code>函数有时可以用来代替<code>COALESCE()</code>。它的语法是:<br>   <code>IFNULL(value,reutnr_if_null)</code><br>如果第一个参数是一个指定列，包含NULL值，那么将返回第二个参数。如果参数不包含NULL值，则返回该参数的值。</li>
+<li><code>FULLTEXT</code>搜索需要<code>FULLTEXT</code>索引，这种类型的索引，只能在<code>MyISAM</code>表中创建。如果50%以上的记录与关键字匹配，则不会返回记录。</li>
+<li><code>OPTIMIZE TABLE tablename</code><br>在通过<code>ALTER</code>命令改变表或对表进行了大量的删除操作后，在记录之间会留下虚拟的间断，而运行这个命令可以 优化数据库。<br>其次，你可以偶尔使用ANALYZE命令：<br>   <code>ANALYZE TABLE tablename</code><br>执行此命令更新表中的索引，从而改善它们在查询中的使用情况。每当存储表中的数据发生批量更改的时候（例如，通过<code>UPDATE</code>或<code>INSERT</code>命令）可以执行这个命令。</li>
+<li><code>数据库优化</code><br>数据库的性能主要依赖于它的结构和索引。创建数据库时尽量：</li>
+</ol>
+<ul>
+<li>选择最佳的存储引擎；</li>
+<li>尽量为每列使用最小的数据类型；</li>
+<li>尽可能定义不可为空(<code>NOT NULL</code>)的列；</li>
+<li>为主键使用整数；</li>
+<li>明智而谨慎地定义索引，选择正确的类型应用到恰当的一列或多列；</li>
+<li>如果可能的话限制索引为固定数目的字符；</li>
+<li>避免创建太多的索引；</li>
+<li>确保作为联结基础的列是相同的类型，如果是字符串的话，使用相同的字符集和校对规则。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/04/23/jdk7%E4%B8%8Emysql%E7%9A%84%E8%BF%9E%E6%8E%A5%E9%97%AE%E9%A2%98/" rel="prev" title="jdk7与mysql的连接问题">
+      <i class="fa fa-chevron-left"></i> jdk7与mysql的连接问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/11/19/android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/" rel="next" title="android学习笔记(1)">
+      android学习笔记(1) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

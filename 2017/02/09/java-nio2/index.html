@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="JAVA NIO.2 参考资料：NIO.2 入门，第 1 部分: 异步通道 API、NIO.2 入门，第 2 部分: 文件系统 API   Files Paths AsynchronousSocketChannel AsynchronousServerSocketChannel AsynchronousDatagramChannel AsynchronousFileChannel  Files、P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java NIO.2 回顾">
+<meta property="og:url" content="http://sortbylist.github.io/2017/02/09/java-nio2/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="JAVA NIO.2 参考资料：NIO.2 入门，第 1 部分: 异步通道 API、NIO.2 入门，第 2 部分: 文件系统 API   Files Paths AsynchronousSocketChannel AsynchronousServerSocketChannel AsynchronousDatagramChannel AsynchronousFileChannel  Files、P">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-02-09T02:47:58.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.497Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="NIO.2">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sortbylist.github.io/2017/02/09/java-nio2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java NIO.2 回顾 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2017/02/09/java-nio2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java NIO.2 回顾
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-09 10:47:58" itemprop="dateCreated datePublished" datetime="2017-02-09T10:47:58+08:00">2017-02-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="JAVA-NIO-2"><a href="#JAVA-NIO-2" class="headerlink" title="JAVA NIO.2"></a>JAVA NIO.2</h3><blockquote>
+<p>参考资料：<a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-nio2-1/">NIO.2 入门，第 1 部分: 异步通道 API</a>、<a target="_blank" rel="noopener" href="http://www.ibm.com/developerworks/cn/java/j-nio2-2/index.html">NIO.2 入门，第 2 部分: 文件系统 API</a></p>
+</blockquote>
+<ul>
+<li>Files</li>
+<li>Paths</li>
+<li>AsynchronousSocketChannel</li>
+<li>AsynchronousServerSocketChannel</li>
+<li>AsynchronousDatagramChannel</li>
+<li>AsynchronousFileChannel</li>
+</ul>
+<h4 id="Files、Paths"><a href="#Files、Paths" class="headerlink" title="Files、Paths"></a>Files、Paths</h4><ul>
+<li><p>Java 7中三个新的文件系统包</p>
+<ul>
+<li>java.nio.file</li>
+<li>java.nio.file.attribute</li>
+<li>java.nio.file.spi</li>
+</ul>
+</li>
+<li><p>最有用的类</p>
+<ul>
+<li><p><code>java.nio.file.Files</code>、<code>java.nio.file.FileVisitor</code>在特定目录按深度优先遍历算法来查询文件或目录，并可对每个查询结果执行用户实现的回调方法。</p>
+</li>
+<li><p><code>java.nio.file.Path</code>、<code>java.nio.file.WatchService</code>允许“注册”来监视特定目录。如果在目录中发生了文件创建、修改或者删除操作，监视目录的应用程序将收到通知。</p>
+</li>
+<li><p><code>java.nio.attribute.*AttributeView</code>允许查询此前对于Java用户隐藏的文件和目录属性，这些属性包括文件所所有 者及组权限，访问控制列表（ACL），以及扩展文件属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">FileVisitor&lt;Path&gt; fileVisitor = <span class="keyword">new</span> <span class="title class_">SimpleFileVisitor</span>&lt;Path&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> FileVisitResult <span class="title function_">preVisitDirectory</span><span class="params">(Path dir)</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;visit dir[&quot;</span> + dir + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> FileVisitResult.CONTINUE;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> FileVisitResult <span class="title function_">visitFile</span><span class="params">(Path file, BasicFileAttributes attribs)</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;visi file[&quot;</span> + file + <span class="string">&quot;]&#x27;s size=&quot;</span> + attribs.size());</span><br><span class="line">    <span class="keyword">return</span> FileVisitResult.CONTINUE;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">Files.walkFileTree(path, fileVisitor);</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>目录监视</p>
+<p>WatchService API。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">WatchService</span> <span class="variable">watchService</span> <span class="operator">=</span> FileSystems.getDefault().newWatchService();</span><br><span class="line"><span class="type">File</span> <span class="variable">watchDirFile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;watchDir&quot;</span>);</span><br><span class="line"><span class="type">Path</span> <span class="variable">watchDirPath</span> <span class="operator">=</span> watchDirFile.toPath(); <span class="comment">//FilesSystems.getDefault().getPath(watchDirFile.getPath())</span></span><br><span class="line"><span class="comment">//Path watchDirPath = Paths.get(&quot;watchDir&quot;);</span></span><br><span class="line"><span class="type">WatchKey</span> <span class="variable">watchKey</span> <span class="operator">=</span> watchDirPath.register(watchService, StandardWatchEventKind.ENTRY_CREATE, StandardWatchEventKind.ENTRY_MODIFY);</span><br><span class="line"><span class="comment">//get watchkey</span></span><br><span class="line"><span class="type">WatchKey</span> <span class="variable">watchKey</span> <span class="operator">=</span> watchService.take(); <span class="comment">//blocking //watchService.poll()/watchService.poll(10,TimeUtil.SECONDS);</span></span><br><span class="line"><span class="keyword">for</span>(WatchEvent&lt;?&gt; event : watchKey.pollEvents()) &#123;</span><br><span class="line">  System.out.println(event.kind() +<span class="string">&quot; with &quot;</span> + event.context());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>文件属性</p>
+<p>使用<code>java.nio.file.attribute</code>包中的类获取并设置文件属性。</p>
+<p>该包中有7个属性视图（AtrributeView)，其中一些特定于操作系统。</p>
+<ul>
+<li><p><code>AclFileAttributeView</code>与<code>AclEntry</code></p>
+<p>允许设置和获取特定文件的ACL（Access Control List）及文件所有者属性。这些属性视图仅可用于Windows系统。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Path path = Paths.get(&quot;c:&quot;, &quot;users&quot;, &quot;download&quot;);</span><br><span class="line">UserPrincipal joe = path.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(&quot;joe&quot;);</span><br><span class="line">//get view</span><br><span class="line">AclFileAttributeView view = Files.getFileAttributeView(path, AclFileAttributeView.class);</span><br><span class="line">//create ACE to give &quot;joe&quot; read access</span><br><span class="line">AclEntry entry = AclEntry.newBuilder().setType(AclEntryType.ALLOW)</span><br><span class="line">  .setPrincipal(joe)</span><br><span class="line">  .setPermissions(AclEntryPermission.READ_DATA, AclEntryPermission.READ_ATTRIBUTES)</span><br><span class="line">  .build();</span><br><span class="line">//read ACL, insert ACE, re-write ACL</span><br><span class="line">List&lt;AclEntry&gt; acl = view.getAcl();</span><br><span class="line">acl.add(0, entry); //insert before any DENY entries</span><br><span class="line">view.setAcl(acl);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>BasicFileAttributeView</code>与<code>BasicFileAttributes</code></p>
+<p>允许获取一系列“平常的”基本文件属性。其中<code>readAttributes()</code>方法返回一 个<code>BasicFileAttributes</code>实例，该实例包含<code>最后修改时间</code>、<code>最后访问时间</code>、<code>创建时间</code>、<code>大小</code>、以及<code>文件属性</code>等细节（常规文件、目录、符号链接、或者其他）。这一属性视图在所有平台上均可用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;attributeFile&quot;</span>);</span><br><span class="line"><span class="type">BasicFileAttributeView</span> <span class="variable">basicView</span> <span class="operator">=</span> Files.getFileAttributeView(path, BasicFileAttributeView.class);</span><br><span class="line"><span class="type">BasicFileAttribute</span> <span class="variable">basicAttribute</span> <span class="operator">=</span> basiceView.readAttributes();</span><br><span class="line"><span class="type">FileTime</span> <span class="variable">newModTime</span> <span class="operator">=</span> FileTime.fromMillis(basicAttribute.lastModifiedTime().toMillis() + <span class="number">60000</span>);</span><br><span class="line">basicView.setTimes(newModTime, <span class="literal">null</span>, <span class="literal">null</span>); <span class="comment">// only update modifyTime</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>DosFileAttributeView</code>与<code>DosFileAttributes</code></p>
+<p>这一视图类允许您获取指定给 DOS 的属性。（您可能会猜想，这一视图仅用于 Windows 系统。）其 <code>readAttributes()</code> 方法返回一个 <code>DosFileAttributes</code> 实例，该实例包含有问题的文件是否为只读、隐藏、系统文件、以及存档文件等细节信息。这一视图还包含针对每个属性的 <code>set*(boolean)</code> 方法。</p>
+</li>
+<li><p><code>FileOwnerAttributeView</code>与<code>UserPrincipal</code></p>
+<p>这一视图类允许您获取并设置特定文件的所有者。其<code>getOwner()</code>方法返回一个<code>UserPrincipal</code>，其getName()方法，返回所有者名字。该视图还提供<code>setOwner(UserPrincipal)</code>方法用于变更文件所有者。这一属性视图在所有平台上均可用。</p>
+</li>
+<li><p><code>PosixFileAttributeView </code>与<code>PosixFileAttributes</code></p>
+<p>允许获取并设置指定给POSIX（Portable Operationg System Interface）的属性。有关特定文件存储的信息。其<code>readAttributes()</code>方法返回一个包含有关这一文件的所有者、组所有者、以及这一文件许可（这些细节通常用UNIX　chmod命令设置）的<code>PosixFileAttributes</code>实例。这一视图还提供<code>setOwner(UserPrincipal)</code>、<code>setGroup(GroupPrincipal)</code>、以及<code>setPermissions(Set&lt;PosixFilePermission&gt;)</code>来修改这些属性。这一属性视图仅在UNIX系统上可用。</p>
+</li>
+<li><p><code>FileStoreAttributeView</code>与<code>FileStore</code></p>
+<p>允许您获取有关特定文件存储的信息。其 <code>readAttributes()</code> 方法返回一个包含文件存储的整个空间、未分配空间、以及已使用空间细节的 <code>FileStoreSpaceAttributes</code> 实例。这一视图在所有平台上都可用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;c:&quot;</span>);</span><br><span class="line"><span class="type">FileStore</span> <span class="variable">fileStore</span> <span class="operator">=</span> Files.getFileStore(path);</span><br><span class="line">fileStore.getTotalSpace(); </span><br><span class="line">fileStore.getUnallocatedSpace();</span><br><span class="line">fileStore.getUsableSpace();</span><br><span class="line">fileStore.isReadOnly();</span><br><span class="line">fileStore.name();</span><br><span class="line"><span class="type">FileStoreAttributeView</span> <span class="variable">view</span> <span class="operator">=</span> fileStore.getFileStoreAttributeView(FileStoreAttributeView.class);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>UserDefinedFileAttributeView</code></p>
+<p>允许您获取并设置文件的<strong>扩展属性</strong>。这些属性跟其他的不同，它们只是名称值对，并可按需对其进行设置。如果想向文件增加一些隐藏的元数据，而不必修改文件内容，这就很有用了。通过<code>list()</code>方法，来返回相关扩展属性的名字列表。然后通过<code>size(String name)</code>返回属性值的大小，通过<code>read(String name, ByteBuffer dst)</code>来将属性值读取到ByteBuffer中，通过<code>write(String name, ByteBuffer source)</code>方法来创建或者修改属性，通过<code>delete(String name)</code>来移除现有属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> Paths.get(<span class="string">&quot;c:&quot;</span>);</span><br><span class="line"><span class="type">UserDefinedFileAttributeView</span> <span class="variable">userView</span> <span class="operator">=</span> Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);</span><br><span class="line">List&lt;String&gt; attribList = userView.list();</span><br><span class="line"><span class="type">ByteBuffer</span> <span class="variable">attribValue</span> <span class="operator">=</span> ByteBuffer.allocate(userView.size(attribName));</span><br><span class="line">userView.read(attribName, attribValue); <span class="comment">//读取</span></span><br><span class="line"><span class="type">CharsetDecoder</span> <span class="variable">decoder</span> <span class="operator">=</span> Charset.forName(<span class="string">&quot;utf-8&quot;</span>).newDecoder();</span><br><span class="line"><span class="type">CharBuffer</span> <span class="variable">buffer</span> <span class="operator">=</span> decoder.decode(attribValue);</span><br><span class="line">userView.write(attribName, attribValue);</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h4 id="异步通道"><a href="#异步通道" class="headerlink" title="异步通道"></a>异步通道</h4><p>通道API提供2种对已启动异步操作的监测与控制机制。第一种是通过返回<code>java.util.concurrent.Future</code>对象来实现，它将会建模一个挂起操作，并可用于查询其状态以及获取结果。第二种通过传递给操作一个新类的对象<code>java.nio.channels.CompletionHandler</code>来完成，它会定义在操作完毕后所需要执行的内容。</p>
+<ul>
+<li><p>异步套接字通道及特性</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">AsynchronousServerSocketChannel</span> <span class="variable">server</span> <span class="operator">=</span> AsynchronousServerSocketChannel.open();</span><br><span class="line">server.bind(<span class="keyword">new</span> <span class="title class_">InetSocketServer</span>(<span class="number">5555</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">//Future </span></span><br><span class="line">Future&lt;AsynchronousSocketChannel&gt; acceptFuture = server.accept(); <span class="comment">//立即返回</span></span><br><span class="line"><span class="comment">//if(!future.isDone()) &#123;</span></span><br><span class="line"><span class="comment">//  future.cancel(true);</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br><span class="line"><span class="keyword">while</span>(!future.isDone()); <span class="comment">//waiting</span></span><br><span class="line"><span class="type">AsynchronousSocketChannel</span> <span class="variable">worker</span> <span class="operator">=</span> future.get();</span><br><span class="line"><span class="comment">//AsynchronousSocketChannel worker = future.get(10, TimeUnit.SECONDS); //等待10秒</span></span><br><span class="line"><span class="comment">// read a message from the client</span></span><br><span class="line">worker.read(readBuffer).get(<span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line">System.out.println(<span class="string">&quot;Message: &quot;</span> + <span class="keyword">new</span> <span class="title class_">String</span>(readBuffer.array()));</span><br><span class="line"></span><br><span class="line"><span class="comment">//CompletionHandler，第一个参数为accept返回值</span></span><br><span class="line">server.accept(<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">CompletionHandler</span>(AsynchronousSocketChannel, Void) &#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">completed</span><span class="params">(AsynchronousSocketChannel ch, Void att)</span> &#123;</span><br><span class="line">   server.accept(<span class="literal">null</span>, <span class="built_in">this</span>); <span class="comment">//accept the next connection</span></span><br><span class="line">    <span class="comment">//handle this connection</span></span><br><span class="line">    handle(ch);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">failed</span><span class="params">(Throwable exc, Void att)</span> &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//client</span></span><br><span class="line"><span class="type">AsynchronousSocketChannel</span> <span class="variable">client</span> <span class="operator">=</span> AsynchronousSocketChannel.open();</span><br><span class="line">client.connect(server.getLocalAddress());</span><br><span class="line"><span class="type">ByteBuffer</span> <span class="variable">message</span> <span class="operator">=</span> ByteBuffer.wrap(<span class="string">&quot;ping&quot;</span>.getBytes());</span><br><span class="line"><span class="type">int</span> <span class="variable">writeLength</span> <span class="operator">=</span> client.write(message).get();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">AsynchronousFileChannel</span> <span class="variable">fileChannel</span> <span class="operator">=</span> AsynchronousFileChannel.open(Paths.get(<span class="string">&quot;afile&quot;</span>), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.DELETE_ON_CLOSE);</span><br><span class="line"></span><br><span class="line">fileChannel.write(ByteBuffer.wrap(bytes), <span class="number">0</span>, <span class="string">&quot;Write operation 1&quot;</span>, <span class="keyword">new</span> <span class="title class_">CompletionHandler</span>&lt;Integer, Object&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">completed</span><span class="params">(Integer result, Object attachment)</span> &#123;</span><br><span class="line">    System.out.println(attachement + <span class="string">&quot; completed with &quot;</span> + result + <span class="string">&quot; bytes Written&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">failed</span><span class="params">(Throwable e, Object attachement)</span> &#123;</span><br><span class="line">    System.err.println(attachment +<span class="string">&quot; fialed with:&quot;</span>);</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步通道组</p>
+<p>每个异步通道都属于一个通道组，它们共享一个Java线程池，该线程池用于完成启动的异步I&#x2F;O操作。<br>默认情况下，具有 <code>open()</code> 方法的通道属于一个全局通道组，可利用如下系统变量对其进行配置：</p>
+<ul>
+<li><code>java.nio.channels.DefaultThreadPool.threadFactory</code>，其不采用默认设置，而是定义一个 <code>java.util.concurrent.ThreadFactory</code></li>
+<li><code>java.nio.channels.DefaultThreadPool.initialSize</code>，指定线程池的初始规模</li>
+</ul>
+<p><code>java.nio.channels.AsynchronousChannelGroup</code> 中的三个实用方法提供了创建新通道组的方法：</p>
+</li>
+<li><p><code>withCachedThreadPool()</code></p>
+</li>
+<li><p><code>withFixedThreadPool()</code></p>
+</li>
+<li><p><code>withThreadPool()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">AsynchronousChannelGroup</span> <span class="variable">tenThreadGroup</span> <span class="operator">=</span> AsynchronousChannelGroup.withFixedThreadPool(<span class="number">10</span>, Executors.defaultThreadFactory());</span><br><span class="line"><span class="type">AysnchronousChannelGroup</span> <span class="variable">tenThreadGroup2</span> <span class="operator">=</span> AsynchronousChannelGroup.withCachedThreadPool(Executors.newCachedThreadPool(), <span class="number">10</span>);</span><br><span class="line"><span class="comment">//使用 tenThreadGroup 而不是默认通道组来获取线程</span></span><br><span class="line"><span class="type">AsynchronousServerSocketChannel</span> <span class="variable">channel</span> <span class="operator">=</span> </span><br><span class="line">    AsynchronousServerSocketChannel.open(tenThreadGroup);</span><br></pre></td></tr></table></figure>
+
+<p>利用通道组来控制线程关闭</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">channel.accept(<span class="literal">null</span>, completionHandler);</span><br><span class="line"><span class="keyword">if</span>(!tenThreadGroup.isShutdown()) &#123;</span><br><span class="line">  tenThreadGroup.shutdown();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(!tenThreadGroup.isTerminated()) &#123;</span><br><span class="line">  tenThreadGroup.shutdownNow();</span><br><span class="line">&#125;</span><br><span class="line">tenThreadGroup.awaitTermination(<span class="number">10</span>, TimeUnit.SECONDS);</span><br></pre></td></tr></table></figure>
+
+<p>AsynchronousFileChannel的open()方法使用ExecutorService而不是AsynchronousChannelGroup来实现定制的线程池。</p>
+</li>
+<li><p>异步数据报通道与多播</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/NIO-2/" rel="tag"># NIO.2</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/08/java-nio/" rel="prev" title="Java NIO回顾">
+      <i class="fa fa-chevron-left"></i> Java NIO回顾
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/09/webservice%E5%9F%BA%E7%A1%80/" rel="next" title="WebService基础回顾">
+      WebService基础回顾 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#JAVA-NIO-2"><span class="nav-number">1.</span> <span class="nav-text">JAVA NIO.2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Files%E3%80%81Paths"><span class="nav-number">1.1.</span> <span class="nav-text">Files、Paths</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E9%80%9A%E9%81%93"><span class="nav-number">1.2.</span> <span class="nav-text">异步通道</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

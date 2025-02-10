@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="AMQP AMQP ( Advance Message Queuing Protocal ) ，高级消息队列协议。是应用层协议的一个开放标准，为面向消息的中间件设计。消息中间件主要用于组件之间的解耦。 AMQP的主要特征是面向消息、队列、路由（ 包括点对点和发布&#x2F;订阅 ）、可靠性、安全。 RabbitMQ是一个开源的 AMQP 实现。服务端用 Erlang 语言编写，支持多种客户端，如P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rabbitmq入门">
+<meta property="og:url" content="http://sortbylist.github.io/2018/01/15/RabbitMQ%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="AMQP AMQP ( Advance Message Queuing Protocal ) ，高级消息队列协议。是应用层协议的一个开放标准，为面向消息的中间件设计。消息中间件主要用于组件之间的解耦。 AMQP的主要特征是面向消息、队列、路由（ 包括点对点和发布&#x2F;订阅 ）、可靠性、安全。 RabbitMQ是一个开源的 AMQP 实现。服务端用 Erlang 语言编写，支持多种客户端，如P">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sortbylist.github.io/images/rabbitmq.png">
+<meta property="article:published_time" content="2018-01-15T06:22:23.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.466Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="Rabbitmq">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sortbylist.github.io/images/rabbitmq.png">
+
+<link rel="canonical" href="http://sortbylist.github.io/2018/01/15/RabbitMQ%E5%85%A5%E9%97%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Rabbitmq入门 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2018/01/15/RabbitMQ%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Rabbitmq入门
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-15 14:22:23" itemprop="dateCreated datePublished" datetime="2018-01-15T14:22:23+08:00">2018-01-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="AMQP"><a href="#AMQP" class="headerlink" title="AMQP"></a>AMQP</h4><ul>
+<li>AMQP ( Advance Message Queuing Protocal ) ，高级消息队列协议。是应用层协议的一个开放标准，为面向消息的中间件设计。消息中间件主要用于组件之间的解耦。</li>
+<li>AMQP的主要特征是面向消息、队列、路由（ 包括点对点和发布&#x2F;订阅 ）、可靠性、安全。</li>
+<li>RabbitMQ是一个开源的 AMQP 实现。服务端用 Erlang 语言编写，支持多种客户端，如<code>Python</code>、<code>Java</code>、<code>C</code>等。用于在分布式系统中存储转发消息。</li>
+</ul>
+<h3 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h3><ul>
+<li><p>原理图</p>
+<p><img src="/images/rabbitmq.png" alt="rabbitmq"></p>
+</li>
+<li><p>概念</p>
+<ul>
+<li><p>server ( broker ) 服务器端</p>
+<p>接受客户端连接，实现 AMQP 消息队列和路由功能的进程</p>
+</li>
+<li><p>producer 生产者</p>
+<p>用来创建消息，然后发消息到代理服务器 ( RabbitMQ )。消息包括有效载荷和标签。</p>
+</li>
+<li><p>consumer 消费者</p>
+</li>
+<li><p>Virtual Host</p>
+<p>这是一个虚拟概念，类似于权限控制组，一个Vitual Host里面可以有若干个Exchange和Queue，但是权限控制的最小粒度是Vitual Host。</p>
+</li>
+<li><p>Exchange 交换机&#x2F;交易所</p>
+<p>所有消息都是发送给它的.由它调度给相应队列。</p>
+<p>接收生产者发送的消息，并根据Binding规则将消息路由给服务器中的队列。ExchangeType决定了Exchange路由消息的行为。在RabbitMQ中，ExchangeType有<code>direct</code>、<code>Fanout</code>和<code>Topic</code>三种。</p>
+</li>
+<li><p>Queue 队列</p>
+<p>RabbitMQ内部的消息缓冲器，用于存储还未被消费者消费的消息。</p>
+</li>
+<li><p>Message 消息</p>
+<p>由<code>Header</code>和<code>Body</code>组成，<code>Header</code>是由生产者添加的各种属性的集合，包括Message是否被持久化、由哪个Message Queue接受、优先级是多少等。<code>Body</code>是真正传输的数据。</p>
+</li>
+<li><p>Binding 绑定规则</p>
+<p>将Exchange和Queue绑定起来，通过Routing Key (路由键)。</p>
+</li>
+<li><p>Routing Key 路由关键字</p>
+<p>exchange根据这个关键字进行消息投递。</p>
+</li>
+<li><p>Connection 连接</p>
+<p>一个连接可以创建多个通道.多个通道共享该连接的通道线程池。</p>
+</li>
+<li><p>Channel 通道</p>
+<p>一个通道通常对应一个生产者或一个消费者，否则可能出现bug,通道可以创建若干消费者，所有被创建的消费者共享connection的消费者线程池。</p>
+</li>
+<li><p>所以，对于消息的过滤，我们首先是指定交易所，然后指定队列和路由。如果需要进一步细分，就可以使用主题。</p>
+</li>
+</ul>
+</li>
+<li><p>使用过程</p>
+<ul>
+<li><strong>消费端</strong><ul>
+<li>消费端连接到消息队列服务器，此时建立一个Connection (连接)</li>
+<li>打开一个Channel</li>
+<li>消费端声明一个Exchange，并设置相关属性</li>
+<li>消费端声明一个Queue，并设置相关属性</li>
+<li>消费端使用Routing Key，在Exchange和Queue之间建立绑定关系</li>
+</ul>
+</li>
+<li><strong>生产端</strong><ul>
+<li>生产端连接到消息队列服务器，此时建立一个Connection(连接)或使用消费端的Connection</li>
+<li>打开一个Channel</li>
+<li>生产端声明一个Exchange，并设置相关属性</li>
+<li>生产端使用Routing Key投递消息到Exchange</li>
+<li>Exchange接收到消息后，根据消息的Routing key和已经设置的binding，进行消息路由（ExchangeType起作用），将消息投递到一个或多个队列中</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Rabbitmq/" rel="tag"># Rabbitmq</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9B%9E%E9%A1%BE/" rel="prev" title="设计模式回顾">
+      <i class="fa fa-chevron-left"></i> 设计模式回顾
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/07/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="next" title="持续集成（Continuuous integration，CI）">
+      持续集成（Continuuous integration，CI） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#AMQP"><span class="nav-number">1.</span> <span class="nav-text">AMQP</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RabbitMQ"><span class="nav-number"></span> <span class="nav-text">RabbitMQ</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
