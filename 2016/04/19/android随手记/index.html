@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="《Android开发艺术探索》笔记   启动新的Activity之前会先调用旧Activity的onPause()方法，因此在onPause()方法中不要做耗时操作  Activity可能被杀死的情况  资源相关的系统配置发生变化。可以通过android:configuration来配置什么情况下不销毁重启Activity，常用属性包括locale,oriontation,keyboardHid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activity的生命周期和启动模式">
+<meta property="og:url" content="http://sortbylist.github.io/2016/04/19/android%E9%9A%8F%E6%89%8B%E8%AE%B0/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="《Android开发艺术探索》笔记   启动新的Activity之前会先调用旧Activity的onPause()方法，因此在onPause()方法中不要做耗时操作  Activity可能被杀死的情况  资源相关的系统配置发生变化。可以通过android:configuration来配置什么情况下不销毁重启Activity，常用属性包括locale,oriontation,keyboardHid">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-19T04:56:28.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.492Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sortbylist.github.io/2016/04/19/android%E9%9A%8F%E6%89%8B%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Activity的生命周期和启动模式 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2016/04/19/android%E9%9A%8F%E6%89%8B%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Activity的生命周期和启动模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-19 12:56:28" itemprop="dateCreated datePublished" datetime="2016-04-19T12:56:28+08:00">2016-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>《Android开发艺术探索》笔记</p>
+</blockquote>
+<ol>
+<li><p>启动新的Activity之前会先调用旧Activity的onPause()方法，因此在onPause()方法中不要做耗时操作</p>
+</li>
+<li><p>Activity可能被杀死的情况</p>
+<ul>
+<li>资源相关的系统配置发生变化。可以通过android:configuration来配置什么情况下不销毁重启Activity，常用属性包括<code>locale</code>,<code>oriontation</code>,<code>keyboardHidden</code>，即语言资源变化，横竖屏切换，键盘显示或隐藏。此时系统回调<code>onConfigurationChanged(Configuration newConfig)</code>函数。</li>
+<li>系统内存不足。系统调用<code>onSaveInstanceState</code>-&gt;<code>onStop()</code>-&gt;<code>onDestroy()</code>，在<code>onSaveInstanceState</code>方法中保存信息；重建时调用，<code>onCreate()</code>-&gt;<code>onStart()</code>-&gt;<code>onRestoreInstanceState</code>，可以在<code>onCreate</code>或<code>onRestoreInstancestate</code>方法中恢复保存的信息。</li>
+</ul>
+</li>
+<li><p><code>android:launchMode</code>属性：</p>
+<ul>
+<li><code>singleInstance</code>保证类存在单独的task中并仅存在一个实例，适合与程序分离的页面，如闹钟提醒页面；  </li>
+<li><code>singleTop</code>表示类在当前task栈顶时，复用，此时调用<code>onNewInstance</code>方法，否则新建实例，适合消息通知类activity；</li>
+<li><code>singleTask</code>表示类在当前task栈中存在时，清空在其上面的所有activity实例，直接复用，此时调用<code>onNewInstance</code>方法，否则新建实例，适合用于程序入口。</li>
+</ul>
+</li>
+<li><p><code>android:taskAffinity</code>属性：</p>
+<ul>
+<li>定义该Activity所属的任务栈，默认为程序的包名。配合<code>launchMode</code>为<code>singleTask</code>时使用</li>
+</ul>
+</li>
+<li><p>Activity的Flags</p>
+<ul>
+<li><code>FLAG_ACTIVITY_NEW_TASK</code><br>效果等同<code>android:launchMode=&quot;singleTask&quot;</code></li>
+<li><code>FLAG_ACTIVITY_SINGLE_TOP</code><br>效果等同<code>android:launchMode=&quot;singleTop&quot;</code></li>
+<li><code>FLAG_ACTIVITY_CLEAR_TOP</code><br>清空同一任务栈中在要启动Activity之上的Activity</li>
+<li><code>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS</code><br>不在历史Activity列表中显示，效果等同<code>android:excludeFromRecents=&quot;true&quot;</code></li>
+</ul>
+</li>
+<li><p>Activity所在任务栈由其<code>taskAffinity</code>属性决定，默认为应用包名。新启动Activity若未指定<code>TaskAffinity</code>，则置于启动其的Activity所在任务栈的栈顶。非Activity的Context启动的Activity需要指定Flags为<code>FLAG_ACTIVITY_NEW_TASK</code>，比如从service中启动Activity，即以singleTask方法启动。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/android/" rel="tag"># android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/03/26/%E7%AC%AC%E4%B8%80%E8%A1%8C%E4%BB%A3%E7%A0%81/" rel="prev" title="第一行代码">
+      <i class="fa fa-chevron-left"></i> 第一行代码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/05/19/android%E5%A5%BD%E6%96%87%E6%94%B6%E9%9B%86/" rel="next" title="android好文收集">
+      android好文收集 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

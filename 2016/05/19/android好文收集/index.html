@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Android Android事件分发机制完全解析，带你从源码的角度彻底理解(上)  Android事件分发机制完全解析，带你从源码的角度彻底理解(下)  onTouch() 方法返回false—&gt;onTouchEvents()—&gt;onClick()   onInterceptTouchEvent默认返回false,优先子类处理点击事件，否则父view处理   给 Android 开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="android好文收集">
+<meta property="og:url" content="http://sortbylist.github.io/2016/05/19/android%E5%A5%BD%E6%96%87%E6%94%B6%E9%9B%86/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="Android Android事件分发机制完全解析，带你从源码的角度彻底理解(上)  Android事件分发机制完全解析，带你从源码的角度彻底理解(下)  onTouch() 方法返回false—&gt;onTouchEvents()—&gt;onClick()   onInterceptTouchEvent默认返回false,优先子类处理点击事件，否则父view处理   给 Android 开发">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-05-19T10:06:18.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.470Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sortbylist.github.io/2016/05/19/android%E5%A5%BD%E6%96%87%E6%94%B6%E9%9B%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>android好文收集 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2016/05/19/android%E5%A5%BD%E6%96%87%E6%94%B6%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          android好文收集
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-05-19 18:06:18" itemprop="dateCreated datePublished" datetime="2016-05-19T18:06:18+08:00">2016-05-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><ol>
+<li><p><a target="_blank" rel="noopener" href="http://blog.csdn.net/guolin_blog/article/details/9097463">Android事件分发机制完全解析，带你从源码的角度彻底理解(上)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://blog.csdn.net/guolin_blog/article/details/9153747">Android事件分发机制完全解析，带你从源码的角度彻底理解(下)</a></p>
+<ul>
+<li>onTouch() 方法返回false—&gt;onTouchEvents()—&gt;onClick()  </li>
+<li>onInterceptTouchEvent默认返回false,优先子类处理点击事件，否则父view处理</li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://gank.io/post/560e15be2dca930e00da1083">给 Android 开发者的 RxJava 详解</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://jaeger.itscoder.com/android/2016/08/28/android-hot-fix.html">Android 热修复方案对比</a></p>
+</li>
+</ol>
+<h3 id="Android-tips-count"><a href="#Android-tips-count" class="headerlink" title="Android tips&#x2F;count"></a>Android tips&#x2F;count</h3><ol>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/jiang111/awesome-android-tips">awesome-android-tips</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/zhujun2730/Android-Learning-Resources">Android学习资源网站大全</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://diycode.cc/topics/8">那些年你用过的 Android 开源项目都有什么?</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://blog.zhaiyifan.cn/2016/04/30/android-new-project-from-0-p5/">从零开始的Android新项目5 - Repository层(上) Retrofit、Repository组装</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/5e93c9101dc5">我所理解的RxJava——上手其实很简单（一）</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://gank.io/post/560e15be2dca930e00da1083#toc_4">给 Android 开发者的 RxJava 详解</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.raye.wang/2017/02/24/quan-mian-liao-jie-nginxdao-di-neng-zuo-shi-yao/">全面了解Nginx到底能做什么</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/markzhai/AndroidProjectFrom0">https://github.com/markzhai/AndroidProjectFrom0</a> &lt;—这是啥？可以吃吗？</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://ydmmocoo.github.io/2016/06/22/Android%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/">https://ydmmocoo.github.io/2016/06/22/Android%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/xiangzhihong/android-Interview">https://github.com/xiangzhihong/android-Interview</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/e99b5e8bd67b">http://www.jianshu.com/p/e99b5e8bd67b</a></p>
+</li>
+</ol>
+<h3 id="面试"><a href="#面试" class="headerlink" title="面试"></a>面试</h3><ol>
+<li><a target="_blank" rel="noopener" href="http://blog.csdn.net/mc_hust/article/details/49517915">Android工程师面试题大全</a></li>
+<li><a target="_blank" rel="noopener" href="http://yuweiguocn.github.io/2016/04/13/interview-2016-big-company/">2016Android某公司面试题</a></li>
+</ol>
+<h3 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h3><ol>
+<li><a target="_blank" rel="noopener" href="http://www.oschina.net/translate/10-tips-git-next-level">10 个迅速提升你 Git 水平的提示</a></li>
+</ol>
+<h3 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://design-patterns.readthedocs.io/zh_CN/latest/">图说设计模式</a></li>
+</ol>
+<h3 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h3><p>dispatchTouchEvent</p>
+<p>onInterceptTouchEvent</p>
+<p>onTouchEvent</p>
+<ol>
+<li>android 事件分发：dispatchTouchEvent-&gt;onInterceptTouchEvent-&gt;onTouchEvent</li>
+<li>android activity的生命周期：onCreate-onStart-onResume-onPause-onStop-onRestart-onDestroy</li>
+<li>activity启动另一个activity时，先调用前一个activity的onPause-&gt;另一个activity的onResume</li>
+</ol>
+<p>保存数据操作可以在onStop中处理或者onDestroy</p>
+<ol>
+<li>fragment生命周期：onAttach-&gt;onCreate-&gt;onCreateView-&gt;onActivityCreated-&gt;onStart-&gt;onResume-&gt;onPause-&gt;onStop-&gt;onDestroyView-&gt;onDestroy-&gt;onDetach</li>
+<li>service生命周期：bindService-&gt;onCreate-&gt;onBind-&gt;onUnBind-&gt;onDestroy</li>
+</ol>
+<p>startService-onCreate-&gt;onStartCommond-onStart</p>
+<ol>
+<li><p>BroadcastReceiver：registerBroadcast</p>
+</li>
+<li><p>Android设计模式[<a target="_blank" rel="noopener" href="https://gof.quanke.name/]">https://gof.quanke.name/]</a></p>
+<ul>
+<li>创建型-&gt;建造者模式、单例模式、简单工厂模式、工厂方法模式、抽象工厂模式、原型模式[6]</li>
+<li>结构型-&gt;适配器模式、桥接模式、装饰模式、外观模式、享元模式、代理模式、组合模式[7]</li>
+<li>行为型-&gt;策略模式、观察者模式、迭代器模式、责任链模式、命令模式、模板方法模式、访问者模式[7]</li>
+</ul>
+</li>
+<li><p>创建型</p>
+<ul>
+<li>建造者模式，</li>
+<li>单例模式，</li>
+<li>简单工厂模式（在一个方法里面作判断,来返回相应的对象实例），</li>
+<li>工厂方法模式（通过接口定义，子类实现来返回相应的对象实例），一般是静态方法</li>
+<li>抽象工厂模式（通过接口定义，将具有同一主题的单独工厂封装在一起）</li>
+<li>单例模式</li>
+<li>原型模式（clone)</li>
+</ul>
+</li>
+<li><p>结构型</p>
+<ul>
+<li><p>适配器模式，客户端：activity-&gt;listview.setAdapter(new MyAdapter());一个类的接口转换成用户所期待的，分为类适配器和对象适配器，类适配器表示为class Adapter implements Target extends Adaptee，通过继承来适配，一般不推荐。对象适配器表示为class Adapter implements Target{Adaptee mAdaptee},通过持有被适配对象的实例来适配</p>
+<p>listview.getCount(),getItemPosition-&gt;Adapter-&gt;Target[ListView所需的getItem,getCount,]-&gt;Adaptee[数据集]</p>
+</li>
+<li><p>桥接模式，将抽象部分与它的实现部分分离，使它们都可以独立地变化</p>
+</li>
+<li><p>组合模式，组合多个对象形成树形结构以表示具有“整体—部分”关系的层次结构</p>
+</li>
+</ul>
+</li>
+<li><p>程序无响应。避免在UI线程执行大量耗时操作，可以使用AsyncTask,HandleThread,Service,Thread</p>
+</li>
+</ol>
+<h3 id="Retrofit-Gson解析"><a href="#Retrofit-Gson解析" class="headerlink" title="Retrofit-Gson解析"></a>Retrofit-Gson解析</h3><p>每次都对应Bean对解析</p>
+<p>Class-&gt;Callback<Person></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;lee&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;male&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>Array-&gt;Callback&lt;List<Person>&gt;</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">  	<span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;lee&quot;</span><span class="punctuation">,</span></span><br><span class="line">  	<span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;male&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;hu&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;female&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>每次请求都有状态码和状态值后，如果使用data把具体的对象包起来</p>
+<p>封装一个Response</p>
+<p>class-&gt;Callback&lt;Response<Person>&gt;</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span><span class="number">200</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span><span class="string">&quot;OK&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;lee&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;male&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>Array-Callback&lt;Response&lt;List<Person>&gt;</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span><span class="number">200</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span><span class="string">&quot;OK&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;lee&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;male&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;hu&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;sex&quot;</span><span class="punctuation">:</span><span class="string">&quot;female&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>Retrofit2可以替换的地方：addConvertFactory(GsonConvertFactory.create())-&gt;增加解析器，如gson解析，将最优先的解析器放在前面。addCallAdapterFactory(new ErrorHandleFacotry.create())&#x2F;addCallAdapterFactory(RxJavaCallAdapter.create())-&gt;替换成自定义call。</p>
+<p>Gson中的GsonBuilder可以自定义，GsonBuilder().registerTypeAdapter(BaseResponse.class,new TypeAdapter() )与registerTypeAdapterFacotry(ItemTypeAdapterFactory.create())基本一致，用于自定义处理BaseResponse返回的数据</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/android/" rel="tag"># android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/19/android%E9%9A%8F%E6%89%8B%E8%AE%B0/" rel="prev" title="Activity的生命周期和启动模式">
+      <i class="fa fa-chevron-left"></i> Activity的生命周期和启动模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/10/03/Dagger2%E8%AF%A6%E8%A7%A3/" rel="next" title="Dagger2详解1">
+      Dagger2详解1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Android"><span class="nav-number">1.</span> <span class="nav-text">Android</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-tips-count"><span class="nav-number">2.</span> <span class="nav-text">Android tips&#x2F;count</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">面试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Git"><span class="nav-number">4.</span> <span class="nav-text">Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">设计模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80"><span class="nav-number">6.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Retrofit-Gson%E8%A7%A3%E6%9E%90"><span class="nav-number">7.</span> <span class="nav-text">Retrofit-Gson解析</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

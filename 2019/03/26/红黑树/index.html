@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="mask-icon" href="/favicon.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sortbylist.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="参考：红黑树(一)之 原理和算法详细介绍  R-B Tree，全称是Red-Black Tree，又称为“红黑树”，它一种特殊的二叉查找树。红黑树的每个节点上都有存储位表示节点的颜色，可以是红(Red)或黑(Black)。 二叉查找树二叉查找树（Binary Search Tree），也称有序二叉树（ordered binary tree）,排序二叉树（sorted binary tree），是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红黑树">
+<meta property="og:url" content="http://sortbylist.github.io/2019/03/26/%E7%BA%A2%E9%BB%91%E6%A0%91/index.html">
+<meta property="og:site_name" content="书生小栈">
+<meta property="og:description" content="参考：红黑树(一)之 原理和算法详细介绍  R-B Tree，全称是Red-Black Tree，又称为“红黑树”，它一种特殊的二叉查找树。红黑树的每个节点上都有存储位表示节点的颜色，可以是红(Red)或黑(Black)。 二叉查找树二叉查找树（Binary Search Tree），也称有序二叉树（ordered binary tree）,排序二叉树（sorted binary tree），是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sortbylist.github.io/images/red_black_tree.png">
+<meta property="og:image" content="http://sortbylist.github.io/images/red_black_tree_left.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/red_black_tree_right.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_case1.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_case2.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_case3.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_del_case1.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_del_case2.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_del_case3.jpg">
+<meta property="og:image" content="http://sortbylist.github.io/images/rb_tree_del_case4.jpg">
+<meta property="article:published_time" content="2019-03-26T03:08:59.000Z">
+<meta property="article:modified_time" content="2019-04-01T08:35:09.532Z">
+<meta property="article:author" content="Jerry Lee">
+<meta property="article:tag" content="红黑树">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sortbylist.github.io/images/red_black_tree.png">
+
+<link rel="canonical" href="http://sortbylist.github.io/2019/03/26/%E7%BA%A2%E9%BB%91%E6%A0%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>红黑树 | 书生小栈</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">书生小栈</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sortbylist.github.io/2019/03/26/%E7%BA%A2%E9%BB%91%E6%A0%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jerry Lee">
+      <meta itemprop="description" content="Java coder">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="书生小栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          红黑树
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-03-26 11:08:59" itemprop="dateCreated datePublished" datetime="2019-03-26T11:08:59+08:00">2019-03-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-01 16:35:09" itemprop="dateModified" datetime="2019-04-01T16:35:09+08:00">2019-04-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/skywang12345/p/3245399.html">红黑树(一)之 原理和算法详细介绍</a></p>
+</blockquote>
+<p>R-B Tree，全称是Red-Black Tree，又称为“红黑树”，它一种特殊的二叉查找树。红黑树的每个节点上都有存储位表示节点的颜色，可以是红(Red)或黑(Black)。</p>
+<h1 id="二叉查找树"><a href="#二叉查找树" class="headerlink" title="二叉查找树"></a>二叉查找树</h1><p>二叉查找树（Binary Search Tree），也称有序二叉树（ordered binary tree）,排序二叉树（sorted binary tree），是指一棵空树或者具有下列性质的二叉树：</p>
+<ul>
+<li>若任意结点的左子树不空，则左子树上所有结点的值均小于它的根结点的值；</li>
+<li>若任意结点的右子树不空，则右子树上所有结点的值均大于它的根结点的值；</li>
+<li>任意结点的左、右子树也分别为二叉查找树。</li>
+<li>没有键值相等的结点（no duplicate nodes）。</li>
+</ul>
+<p>因为，一棵由n个结点，随机构造的二叉查找树的高度为lgn，所以顺理成章，一般操作的执行时间为O（lgn）.（至于n个结点的二叉树高度为lgn的证明，可参考算法导论 第12章 二叉查找树 第12.4节）。</p>
+<p>但二叉树若退化成了一棵具有n个结点的线性链后，则此些操作最坏情况运行时间为O（n）。后面我们会看到一种基于二叉查找树-红黑树，它通过一些性质使得树相对平衡，使得最终查找、插入、删除的时间复杂度最坏情况下依然为O（lgn）。</p>
+<h1 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h1><ul>
+<li><strong>每个节点或者是黑色，或者是红色。</strong></li>
+<li><strong>根节点是黑色。</strong></li>
+<li><strong>每个叶子节点（NIL）是黑色。 [注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！]</strong></li>
+<li><strong>如果一个节点是红色的，则它的子节点必须是黑色的。</strong></li>
+<li><strong>从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。</strong></li>
+</ul>
+<p>这些约束确保了红黑树的关键特性：从根到叶子的最长的可能路径不多于最短的可能路径的两倍长。结果是这个树大致上是平衡的。因为操作比如插入、删除和查找某个值的最坏情况时间都要求与树的高度成比例，这个在高度上的理论上限允许红黑树在最坏情况下都是高效的，而不同于普通的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91">二叉查找树</a>。</p>
+<p>要知道为什么这些性质确保了这个结果，注意到性质4导致了路径不能有两个毗连的红色节点就足够了。最短的可能路径都是黑色节点，最长的可能路径有交替的红色和黑色节点。因为根据性质5所有最长的路径都有相同数目的黑色节点，这就表明了没有路径能多于任何其他路径的两倍长。</p>
+<p><img src="/images/red_black_tree.png" alt="红黑树"></p>
+<p>红黑树的应用比较广泛，主要是用它来存储有序的数据，它在二叉查找树的基础上增加了着色和相关的性质使得红黑树相对平衡，从而保证了红黑树的查找、插入、删除的时间复杂度最坏为O(log n)。</p>
+<h1 id="红黑树的旋转"><a href="#红黑树的旋转" class="headerlink" title="红黑树的旋转"></a>红黑树的旋转</h1><p>当我们在对红黑树进行插入和删除等操作时，对树做了修改，那么可能会违背红黑树的性质。</p>
+<p>为了继续保持红黑树的性质，我们可以通过对结点进行重新着色，以及对树进行相关的旋转操作，即修改树中某些结点的颜色及指针结构，来达到对红黑树进行插入或删除结点等操作后，继续保持它的性质或平衡。</p>
+<p>树的旋转，分为左旋和右旋</p>
+<h2 id="左旋"><a href="#左旋" class="headerlink" title="左旋"></a>左旋</h2><p><img src="/images/red_black_tree_left.jpg" alt="红黑树左旋"></p>
+<p>对x进行左旋，意味着”将x变成一个左节点”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 《算法导论》伪代码</span></span><br><span class="line">LEFT-ROTATE(T, x)  </span><br><span class="line"> y ← right[x]            <span class="comment">// 前提：这里假设x的右孩子为y。下面开始正式操作</span></span><br><span class="line"> right[x] ← left[y]      <span class="comment">// 将 “y的左孩子” 设为 “x的右孩子”，即 将β设为x的右孩子</span></span><br><span class="line"> p[left[y]] ← x          <span class="comment">// 将 “x” 设为 “y的左孩子的父亲”，即 将β的父亲设为x</span></span><br><span class="line"> p[y] ← p[x]             <span class="comment">// 将 “x的父亲” 设为 “y的父亲”</span></span><br><span class="line"> <span class="keyword">if</span> p[x] = nil[T]       </span><br><span class="line"> then root[T] ← y                 <span class="comment">// 情况1：如果 “x的父亲” 是空节点，则将y设为根节点</span></span><br><span class="line"> <span class="keyword">else</span> <span class="type">if</span> <span class="variable">x</span> <span class="operator">=</span> left[p[x]]  </span><br><span class="line">           then left[p[x]] ← y    <span class="comment">// 情况2：如果 x是它父节点的左孩子，则将y设为“x的父节点的左孩子”</span></span><br><span class="line">           <span class="keyword">else</span> right[p[x]] ← y   <span class="comment">// 情况3：(x是它父节点的右孩子) 将y设为“x的父节点的右孩子”</span></span><br><span class="line"> left[y] ← x             <span class="comment">// 将 “x” 设为 “y的左孩子”</span></span><br><span class="line"> p[x] ← y                <span class="comment">// 将 “x的父节点” 设为 “y”</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="右旋"><a href="#右旋" class="headerlink" title="右旋"></a>右旋</h2><p><img src="/images/red_black_tree_right.jpg" alt="红黑树右旋"></p>
+<p>对x进行右旋，意味着”将x变成一个右节点”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 《算法导论》伪代码</span></span><br><span class="line">RIGHT-ROTATE(T, y)  </span><br><span class="line"> x ← left[y]             <span class="comment">// 前提：这里假设y的左孩子为x。下面开始正式操作</span></span><br><span class="line"> left[y] ← right[x]      <span class="comment">// 将 “x的右孩子” 设为 “y的左孩子”，即 将β设为y的左孩子</span></span><br><span class="line"> p[right[x]] ← y         <span class="comment">// 将 “y” 设为 “x的右孩子的父亲”，即 将β的父亲设为y</span></span><br><span class="line"> p[x] ← p[y]             <span class="comment">// 将 “y的父亲” 设为 “x的父亲”</span></span><br><span class="line"> <span class="keyword">if</span> p[y] = nil[T]       </span><br><span class="line"> then root[T] ← x                 <span class="comment">// 情况1：如果 “y的父亲” 是空节点，则将x设为根节点</span></span><br><span class="line"> <span class="keyword">else</span> <span class="type">if</span> <span class="variable">y</span> <span class="operator">=</span> right[p[y]]  </span><br><span class="line">           then right[p[y]] ← x   <span class="comment">// 情况2：如果 y是它父节点的右孩子，则将x设为“y的父节点的左孩子”</span></span><br><span class="line">           <span class="keyword">else</span> left[p[y]] ← x    <span class="comment">// 情况3：(y是它父节点的左孩子) 将x设为“y的父节点的左孩子”</span></span><br><span class="line"> right[x] ← y            <span class="comment">// 将 “y” 设为 “x的右孩子”</span></span><br><span class="line"> p[y] ← x                <span class="comment">// 将 “y的父节点” 设为 “x”</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="红黑树的插入"><a href="#红黑树的插入" class="headerlink" title="红黑树的插入"></a>红黑树的插入</h1><p>将一个节点插入到红黑树中，需要执行哪些步骤呢？首先，将红黑树当作一颗二叉查找树，将节点插入；然后，将节点着色为红色；最后，通过旋转和重新着色等方法来修正该树，使之重新成为一颗红黑树。</p>
+<span id="more"></span>
+
+<h2 id="二叉查找树的插入"><a href="#二叉查找树的插入" class="headerlink" title="二叉查找树的插入"></a>二叉查找树的插入</h2><p>从根开始遍历，如果当前结点小于要插入的值，则在左子树中开始查找，否则从右子树中开始查找。一直到某个合适节点没有子节点后，该节点即要插入节点的父节点，如果插入节点比父节点小，则为左孩子，否则为右孩子。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 《算法导论》伪代码</span></span><br><span class="line">TREE-INSERT(T, z)</span><br><span class="line"> y ← nil[T]                        <span class="comment">// 新建节点“y”，将y设为空节点。</span></span><br><span class="line"> x ← root[T]                       <span class="comment">// 设“红黑树T”的根节点为“x”</span></span><br><span class="line"> <span class="keyword">while</span> x ≠ nil[T]                  <span class="comment">// 找出要插入的节点“z”在二叉树T中的位置“y”</span></span><br><span class="line">     <span class="keyword">do</span> y ← x                      </span><br><span class="line">        <span class="keyword">if</span> key[z] &lt; key[x]  </span><br><span class="line">           then x ← left[x]  </span><br><span class="line">           <span class="keyword">else</span> x ← right[x]  </span><br><span class="line"> p[z] ← y                          <span class="comment">// 设置 “z的父亲” 为 “y”</span></span><br><span class="line"> <span class="type">if</span> <span class="variable">y</span> <span class="operator">=</span> nil[T]                     </span><br><span class="line">    then root[T] ← z               <span class="comment">// 情况1：若y是空节点，则将z设为根</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> key[z] &lt; key[y]        </span><br><span class="line">            then left[y] ← z       <span class="comment">// 情况2：若“z所包含的值” &lt; “y所包含的值”，则将z设为“y的左孩子”</span></span><br><span class="line">            <span class="keyword">else</span> right[y] ← z      <span class="comment">// 情况3：(“z所包含的值” &gt;= “y所包含的值”)将z设为“y的右孩子” </span></span><br></pre></td></tr></table></figure>
+
+<h2 id="红黑树的插入和修复"><a href="#红黑树的插入和修复" class="headerlink" title="红黑树的插入和修复"></a>红黑树的插入和修复</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 《算法导论》伪代码</span></span><br><span class="line">RB-INSERT(T, z)  </span><br><span class="line"> TREE-INSERT(T, z)					<span class="comment">//调用TREE-INSERT,即普通二叉查找树的插入</span></span><br><span class="line"> left[z] ← nil[T]                  <span class="comment">// z的左孩子设为空</span></span><br><span class="line"> right[z] ← nil[T]                 <span class="comment">// z的右孩子设为空。至此，已经完成将“节点z插入到二叉树”中了。</span></span><br><span class="line"> color[z] ← RED                    <span class="comment">// 将z着色为“红色”</span></span><br><span class="line"> RB-INSERT-FIXUP(T, z)             <span class="comment">// 通过RB-INSERT-FIXUP对红黑树的节点进行颜色修改以及旋转，让树T仍然是一颗红黑树</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//修复</span></span><br><span class="line">RB-INSERT-FIXUP(T, z)</span><br><span class="line"><span class="keyword">while</span> color[p[z]] = RED             <span class="comment">// 若“当前节点(z)的父节点是红色”，则进行以下处理。</span></span><br><span class="line">  <span class="keyword">do</span> <span class="keyword">if</span> p[z] = left[p[p[z]]]        <span class="comment">// 若“z的父节点”是“z的祖父节点的左孩子”，则进行以下处理。</span></span><br><span class="line">    then y ← right[p[p[z]]]         <span class="comment">// 将y设置为“z的叔叔节点(z的祖父节点的右孩子)”</span></span><br><span class="line">      <span class="keyword">if</span> color[y] = RED             <span class="comment">// Case 1条件：叔叔是红色</span></span><br><span class="line">        then color[p[z]] ← BLACK    ▹ Case <span class="number">1</span>   <span class="comment">//  (01) 将“父节点”设为黑色。</span></span><br><span class="line">           color[y] ← BLACK         ▹ Case <span class="number">1</span>   <span class="comment">//  (02) 将“叔叔节点”设为黑色。</span></span><br><span class="line">           color[p[p[z]]] ← RED     ▹ Case <span class="number">1</span>   <span class="comment">//  (03) 将“祖父节点”设为“红色”。</span></span><br><span class="line">           z ← p[p[z]]              ▹ Case <span class="number">1</span>   <span class="comment">//  (04) 将“祖父节点”设为“当前节点”(红色节点)</span></span><br><span class="line">        <span class="keyword">else</span> <span class="type">if</span> <span class="variable">z</span> <span class="operator">=</span> right[p[z]]               <span class="comment">// Case 2条件：叔叔是黑色，且当前节点是右孩子</span></span><br><span class="line">           then z ← p[z]            ▹ Case <span class="number">2</span>   <span class="comment">//  (01) 将“父节点”作为“新的当前节点”。</span></span><br><span class="line">             LEFT-ROTATE(T, z)      ▹ Case <span class="number">2</span>   <span class="comment">//  (02) 以“新的当前节点”为支点进行左旋。</span></span><br><span class="line">           color[p[z]] ← BLACK      ▹ Case <span class="number">3</span>   <span class="comment">// Case 3条件：叔叔是黑色，且当前节点是左孩子。(01) 将“父节点”设为“黑色”。</span></span><br><span class="line">           color[p[p[z]]] ← RED     ▹ Case <span class="number">3</span>   <span class="comment">//  (02) 将“祖父节点”设为“红色”。</span></span><br><span class="line">           RIGHT-ROTATE(T, p[p[z]]) ▹ Case <span class="number">3</span>   <span class="comment">//  (03) 以“祖父节点”为支点进行右旋。</span></span><br><span class="line">  <span class="keyword">else</span> (same as then clause with <span class="string">&quot;right&quot;</span> and <span class="string">&quot;left&quot;</span> exchanged)    <span class="comment">// 若“z的父节点”是“z的祖父节点的右孩子”，将上面的操作中“right”和“left”交换位置，然后依次执行。</span></span><br><span class="line">color[root[T]] ← BLACK</span><br></pre></td></tr></table></figure>
+
+<p>为什么将插入节点着色为”红色”?</p>
+<p>如果设为黑色，就会导致根到叶子的路径上有一条路上，多一个额外的黑节点，这个是很难调整的。但是设为红色节点后，可能会导致出现两个连续红色节点的冲突，那么可以通过颜色调换（color flips）和树旋转来调整。</p>
+<ul>
+<li>性质1和性质3总是保持着。</li>
+<li>性质4只在增加红色节点、重绘黑色节点为红色，或做旋转时受到威胁。</li>
+<li>性质5只在增加黑色节点、重绘红色节点为黑色，或做旋转时受到威胁。</li>
+</ul>
+<p>根据被插入节点的父节点的情况，可以将”当节点z被着色为红色节点，并插入二叉树”划分为三种情况来处理。<br>① 情况说明：被插入的节点是根节点。<br>    处理方法：直接把此节点涂为黑色。<br>② 情况说明：被插入的节点的父节点是黑色。<br>    处理方法：什么也不需要做。节点被插入后，仍然是红黑树。<br>③ 情况说明：被插入的节点的父节点是红色。<br>    处理方法：那么，该情况与红黑树的“特性(5)”相冲突。这种情况下，被插入节点是一定存在非空祖父节点的(如果不存在，则父节点为根节点，而根节点是黑色的）；进一步的讲，被插入节点也一定存在叔叔节点(即使叔叔节点为空，我们也视之为存在，空节点本身就是黑色节点)。理解这点之后，我们依据”叔叔节点的情况”，将这种情况进一步划分为3种情况(Case)。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>现象说明</strong></th>
+<th><strong>处理策略</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Case 1</td>
+<td>当前节点的父节点是红色，且当前节点的祖父节点的另一个子节点（叔叔节点）也是红色。</td>
+<td>(01) 将“父节点”设为黑色。 <br/>(02) 将“叔叔节点”设为黑色。<br/> (03) 将“祖父节点”设为“红色”。<br/> (04) 将“祖父节点”设为“当前节点”(红色节点)；即，之后继续对“当前节点”进行操作。</td>
+</tr>
+<tr>
+<td>Case 2</td>
+<td>当前节点的父节点是红色，叔叔节点是黑色，且当前节点是其父节点的右孩子</td>
+<td>(01) 将“父节点”作为“新的当前节点”。<br/> (02) 以“新的当前节点”为支点进行左旋。</td>
+</tr>
+<tr>
+<td>Case 3</td>
+<td>当前节点的父节点是红色，叔叔节点是黑色，且当前节点是其父节点的左孩子</td>
+<td>(01) 将“父节点”设为“黑色”。<br/> (02) 将“祖父节点”设为“红色”。<br/> (03) 以“祖父节点”为支点进行右旋。</td>
+</tr>
+</tbody></table>
+<p>Case1这样处理的原因：</p>
+<p> “当前节点”和“父节点”都是红色，违背“特性(4)”。所以，将“父节点”设置“黑色”以解决这个问题。<br>    但是，将“父节点”由“红色”变成“黑色”之后，违背了“特性(5)”：因为，包含“父节点”的分支的黑色节点的总数增加了1。  解决这个问题的办法是：将“祖父节点”由“黑色”变成红色，同时，将“叔叔节点”由“红色”变成“黑色”。关于这里，说明几点：第一，为什么“祖父节点”之前是黑色？这个应该很容易想明白，因为在变换操作之前，该树是红黑树，“父节点”是红色，那么“祖父节点”一定是黑色。 第二，为什么将“祖父节点”由“黑色”变成红色，同时，将“叔叔节点”由“红色”变成“黑色”；能解决“包含‘父节点’的分支的黑色节点的总数增加了1”的问题。这个道理也很简单。“包含‘父节点’的分支的黑色节点的总数增加了1” 同时也意味着 “包含‘祖父节点’的分支的黑色节点的总数增加了1”，既然这样，我们通过将“祖父节点”由“黑色”变成“红色”以解决“包含‘祖父节点’的分支的黑色节点的总数增加了1”的问题； 但是，这样处理之后又会引起另一个问题“包含‘叔叔’节点的分支的黑色节点的总数减少了1”，现在我们已知“叔叔节点”是“红色”，将“叔叔节点”设为“黑色”就能解决这个问题。 所以，将“祖父节点”由“黑色”变成红色，同时，将“叔叔节点”由“红色”变成“黑色”；就解决了该问题。<br>    按照上面的步骤处理之后：当前节点、父节点、叔叔节点之间都不会违背红黑树特性，但祖父节点却不一定。若此时，祖父节点是根节点，直接将祖父节点设为“黑色”，那就完全解决这个问题了；若祖父节点不是根节点，那我们需要将“祖父节点”设为“新的当前节点”，接着对“新的当前节点”进行分析。</p>
+<p><img src="/images/rb_tree_case1.jpg" alt="case1处理图"></p>
+<p>Case2这样处理的原因：</p>
+<p>首先，将“父节点”作为“新的当前节点”；接着，以“新的当前节点”为支点进行左旋。 为了便于理解，我们先说明第(02)步，再说明第(01)步；为了便于说明，我们设置“父节点”的代号为F(Father)，“当前节点”的代号为S(Son)。<br>为什么要“以F为支点进行左旋”呢？根据已知条件可知：S是F的右孩子。而之前我们说过，我们处理红黑树的核心思想：将红色的节点移到根节点；然后，将根节点设为黑色。既然是“将红色的节点移到根节点”，那就是说要不断的将破坏红黑树特性的红色节点上移(即向根方向移动)。 而S又是一个右孩子，因此，我们可以通过“左旋”来将S上移！<br>      按照上面的步骤(以F为支点进行左旋)处理之后：若S变成了根节点，那么直接将其设为“黑色”，就完全解决问题了；若S不是根节点，那我们需要执行步骤(01)，即“将F设为‘新的当前节点’”。那为什么不继续以S为新的当前节点继续处理，而需要以F为新的当前节点来进行处理呢？这是因为“左旋”之后，F变成了S的“子节点”，即S变成了F的父节点；而我们处理问题的时候，需要从下至上(由叶到根)方向进行处理；也就是说，必须先解决“孩子”的问题，再解决“父亲”的问题；所以，我们执行步骤(01)：将“父节点”作为“新的当前节点”。</p>
+<p><img src="/images/rb_tree_case2.jpg" alt="case2处理图"></p>
+<p>Case3这样处理的原因：</p>
+<p>为了便于说明，我们设置“当前节点”为S(Original Son)，“兄弟节点”为B(Brother)，“叔叔节点”为U(Uncle)，“父节点”为F(Father)，祖父节点为G(Grand-Father)。<br>      S和F都是红色，违背了红黑树的“特性(4)”，我们可以将F由“红色”变为“黑色”，就解决了“违背‘特性(4)’”的问题；但却引起了其它问题：违背特性(5)，因为将F由红色改为黑色之后，所有经过F的分支的黑色节点的个数增加了1。那我们如何解决“所有经过F的分支的黑色节点的个数增加了1”的问题呢？ 我们可以通过“将G由黑色变成红色”，同时“以G为支点进行右旋”来解决。</p>
+<p><img src="/images/rb_tree_case3.jpg" alt="case3处理图"></p>
+<h1 id="红黑树的删除"><a href="#红黑树的删除" class="headerlink" title="红黑树的删除"></a>红黑树的删除</h1><p>首先，将红黑树当作一颗二叉查找树，将该节点从二叉查找树中删除；然后，通过”旋转和重新着色”等一系列来修正该树，使之重新成为一棵红黑树</p>
+<h2 id="二叉查找树的删除"><a href="#二叉查找树的删除" class="headerlink" title="二叉查找树的删除"></a>二叉查找树的删除</h2><p>这和”删除常规二叉查找树中删除节点的方法是一样的”。分3种情况：</p>
+<ul>
+<li>被删除节点没有儿子，即为叶节点。那么，直接将该节点删除就OK了。</li>
+<li>被删除节点只有一个儿子。那么，直接删除该节点，并用该节点的唯一子节点顶替它的位置。</li>
+<li>被删除节点有两个儿子。那么，先找出它的后继节点；然后把“它的后继节点的内容”复制给“该节点的内容”；之后，删除“它的后继节点”。在这里，后继节点相当于替身，在将后继节点的内容复制给”被删除节点”之后，再将后继节点删除。这样就巧妙的将问题转换为”删除后继节点”的情况了，下面就考虑后继节点。 在”被删除节点”有两个非空子节点的情况下，它的后继节点不可能是双子非空。既然”的后继节点”不可能双子都非空，就意味着”该节点的后继节点”要么没有儿子，要么只有一个儿子。若没有儿子，则按”情况① “进行处理；若只有一个儿子，则按”情况② “进行处理。</li>
+</ul>
+<h2 id="红黑树的删除和修复"><a href="#红黑树的删除和修复" class="headerlink" title="红黑树的删除和修复"></a>红黑树的删除和修复</h2><h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">RB-DELETE(T, z)</span><br><span class="line"> <span class="keyword">if</span> left[z] = nil[T] or right[z] = nil[T]         </span><br><span class="line">    then y ← z                          <span class="comment">// 若“z的左孩子” 或 “z的右孩子”为空，则将“z”赋值给 “y”；</span></span><br><span class="line">    <span class="keyword">else</span> y ← TREE-SUCCESSOR(z)          <span class="comment">// 否则，将“z的后继节点”赋值给 “y”。</span></span><br><span class="line"> <span class="keyword">if</span> left[y] ≠ nil[T]</span><br><span class="line">    then x ← left[y]                    <span class="comment">// 若“y的左孩子” 不为空，则将“y的左孩子” 赋值给 “x”；</span></span><br><span class="line">    <span class="keyword">else</span> x ← right[y]                   <span class="comment">// 否则，“y的右孩子” 赋值给 “x”。</span></span><br><span class="line"> p[x] ← p[y]                            <span class="comment">// 将“y的父节点” 设置为 “x的父节点”</span></span><br><span class="line"> <span class="keyword">if</span> p[y] = nil[T]                               </span><br><span class="line">    then root[T] ← x                    <span class="comment">// 情况1：若“y的父节点” 为空，则设置“x” 为 “根节点”。</span></span><br><span class="line">    <span class="keyword">else</span> <span class="type">if</span> <span class="variable">y</span> <span class="operator">=</span> left[p[y]]                    </span><br><span class="line">            then left[p[y]] ← x         <span class="comment">// 情况2：若“y是它父节点的左孩子”，则设置“x” 为 “y的父节点的左孩子”</span></span><br><span class="line">            <span class="keyword">else</span> right[p[y]] ← x        <span class="comment">// 情况3：若“y是它父节点的右孩子”，则设置“x” 为 “y的父节点的右孩子”</span></span><br><span class="line"> <span class="keyword">if</span> y ≠ z                                    </span><br><span class="line">    then key[z] ← key[y]                <span class="comment">// 若“y的值” 赋值给 “z”。注意：这里只拷贝z的值给y，而没有拷贝z的颜色！！！</span></span><br><span class="line">         copy y<span class="string">&#x27;s satellite data into z         </span></span><br><span class="line"><span class="string"> if color[y] = BLACK                            </span></span><br><span class="line"><span class="string">    then RB-DELETE-FIXUP(T, x)          // 若“y为黑节点”，则调用</span></span><br><span class="line"><span class="string"> return y</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">RB-DELETE-FIXUP(T, x)</span><br><span class="line"><span class="keyword">while</span> x ≠ root[T] and color[x] = BLACK  </span><br><span class="line">  <span class="keyword">do</span> <span class="type">if</span> <span class="variable">x</span> <span class="operator">=</span> left[p[x]]    </span><br><span class="line">    then w ← right[p[x]]         <span class="comment">// 若 “x”是“它父节点的左孩子”，则设置 “w”为“x的叔叔”(即x为它父节点的右孩子)              </span></span><br><span class="line">      <span class="keyword">if</span> color[w] = RED          <span class="comment">// Case 1: x是“黑+黑”节点，x的兄弟节点是红色。(此时x的父节点和x的兄弟节点的子节点都是黑节点)。</span></span><br><span class="line">       then color[w] ← BLACK     ▹  Case <span class="number">1</span>   <span class="comment">//   (01) 将x的兄弟节点设为“黑色”。</span></span><br><span class="line">        color[p[x]] ← RED        ▹  Case <span class="number">1</span>   <span class="comment">//   (02) 将x的父节点设为“红色”。</span></span><br><span class="line">        LEFT-ROTATE(T, p[x])     ▹  Case <span class="number">1</span>   <span class="comment">//   (03) 对x的父节点进行左旋。</span></span><br><span class="line">        w ← right[p[x]]          ▹  Case <span class="number">1</span>   <span class="comment">//   (04) 左旋后，重新设置x的兄弟节点。</span></span><br><span class="line">      <span class="keyword">if</span> color[left[w]] = BLACK and color[right[w]] = BLACK     <span class="comment">// Case 2: x是“黑+黑”节点，x的兄弟节点是黑色，x的兄弟节点的两个孩子都是黑色。</span></span><br><span class="line">       then color[w] ← RED       ▹  Case <span class="number">2</span>   <span class="comment">//   (01) 将x的兄弟节点设为“红色”。</span></span><br><span class="line">        x ←  p[x]                ▹  Case <span class="number">2</span>   <span class="comment">//   (02) 设置“x的父节点”为“新的x节点”。</span></span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span> color[right[w]] = BLACK      <span class="comment">// Case 3: x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的左孩子是红色，右孩子是黑色的。</span></span><br><span class="line">         then color[left[w]] ← BLACK    ▹  Case <span class="number">3</span>   <span class="comment">//   (01) 将x兄弟节点的左孩子设为“黑色”。</span></span><br><span class="line">            color[w] ← RED       ▹  Case <span class="number">3</span>   <span class="comment">//   (02) 将x兄弟节点设为“红色”。</span></span><br><span class="line">            RIGHT-ROTATE(T, w)   ▹  Case <span class="number">3</span>   <span class="comment">//   (03) 对x的兄弟节点进行右旋。</span></span><br><span class="line">            w ← right[p[x]]      ▹  Case <span class="number">3</span>   <span class="comment">//   (04) 右旋后，重新设置x的兄弟节点。</span></span><br><span class="line">       color[w] ← color[p[x]]    ▹  Case <span class="number">4</span>   <span class="comment">// Case 4: x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的右孩子是红色的。(01) 将x父节点颜色 赋值给 x的兄弟节点。</span></span><br><span class="line">       color[p[x]] ← BLACK       ▹  Case <span class="number">4</span>   <span class="comment">//   (02) 将x父节点设为“黑色”。</span></span><br><span class="line">       color[right[w]] ← BLACK   ▹  Case <span class="number">4</span>   <span class="comment">//   (03) 将x兄弟节点的右子节设为“黑色”。</span></span><br><span class="line">       LEFT-ROTATE(T, p[x])      ▹  Case <span class="number">4</span>   <span class="comment">//   (04) 对x的父节点进行左旋。</span></span><br><span class="line">       x ← root[T]               ▹  Case <span class="number">4</span>   <span class="comment">//   (05) 设置“x”为“根节点”。</span></span><br><span class="line">     <span class="keyword">else</span> (same as then clause with <span class="string">&quot;right&quot;</span> and <span class="string">&quot;left&quot;</span> exchanged)    <span class="comment">// 若 “x”是“它父节点的右孩子”，将上面的操作中“right”和“left”交换位置，然后依次执行。</span></span><br><span class="line">color[x] ← BLACK</span><br></pre></td></tr></table></figure>
+
+<p>前面我们将”删除红黑树中的节点”大致分为两步，在第一步中”将红黑树当作一颗二叉查找树，将节点删除”后，可能违反”特性(2)、(4)、(5)”三个特性。第二步需要解决上面的三个问题，进而保持红黑树的全部特性。<br>      为了便于分析，我们假设”x包含一个额外的黑色”(x原本的颜色还存在)，这样就不会违反”特性(5)”。为什么呢？<br>      通过RB-DELETE算法，我们知道：删除节点y之后，x占据了原来节点y的位置。 既然删除y(y是黑色)，意味着减少一个黑色节点；那么，再在该位置上增加一个黑色即可。这样，当我们假设”x包含一个额外的黑色”，就正好弥补了”删除y所丢失的黑色节点”，也就不会违反”特性(5)”。 因此，假设”x包含一个额外的黑色”(x原本的颜色还存在)，这样就不会违反”特性(5)”。<br>      现在，x不仅包含它原本的颜色属性，x还包含一个额外的黑色。即x的颜色属性是”红+黑”或”黑+黑”，它违反了”特性(1)”。</p>
+<p>​      现在，我们面临的问题，由解决”违反了特性(2)、(4)、(5)三个特性”转换成了”解决违反特性(1)、(2)、(4)三个特性”。RB-DELETE-FIXUP需要做的就是通过算法恢复红黑树的特性(1)、(2)、(4)。RB-DELETE-FIXUP的思想是：将x所包含的额外的黑色不断沿树上移(向根方向移动)，直到出现下面的姿态：<br>a) x指向一个”红+黑”节点。此时，将x设为一个”黑”节点即可。<br>b) x指向根。此时，将x设为一个”黑”节点即可。<br>c) 非前面两种姿态。</p>
+<p>将上面的姿态，可以概括为3种情况。<br>① 情况说明：x是“红+黑”节点。<br>    处理方法：直接把x设为黑色，结束。此时红黑树性质全部恢复。<br>② 情况说明：x是“黑+黑”节点，且x是根。<br>    处理方法：什么都不做，结束。此时红黑树性质全部恢复。<br>③ 情况说明：x是“黑+黑”节点，且x不是根。<br>    处理方法：这种情况又可以划分为4种子情况。这4种子情况如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>现象说明</th>
+<th>处理策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Case 1</strong></td>
+<td>x是”黑+黑”节点，x的兄弟节点是红色。(此时x的父节点和x的兄弟节点的子节点都是黑节点)。</td>
+<td>(01) 将x的兄弟节点设为“黑色”。 (02) 将x的父节点设为“红色”。 (03) 对x的父节点进行左旋。 (04) 左旋后，重新设置x的兄弟节点。</td>
+</tr>
+<tr>
+<td><strong>Case 2</strong></td>
+<td>x是“黑+黑”节点，x的兄弟节点是黑色，x的兄弟节点的两个孩子都是黑色。</td>
+<td>(01) 将x的兄弟节点设为“红色”。 (02) 设置“x的父节点”为“新的x节点”。</td>
+</tr>
+<tr>
+<td><strong>Case 3</strong></td>
+<td>x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的左孩子是红色，右孩子是黑色的。</td>
+<td>(01) 将x兄弟节点的左孩子设为“黑色”。 (02) 将x兄弟节点设为“红色”。 (03) 对x的兄弟节点进行右旋。 (04) 右旋后，重新设置x的兄弟节点。</td>
+</tr>
+<tr>
+<td><strong>Case 4</strong></td>
+<td>x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的右孩子是红色的，x的兄弟节点的左孩子任意颜色。</td>
+<td>(01) 将x父节点颜色 赋值给 x的兄弟节点。 (02) 将x父节点设为“黑色”。 (03) 将x兄弟节点的右子节设为“黑色”。 (04) 对x的父节点进行左旋。 (05) 设置“x”为“根节点”。</td>
+</tr>
+</tbody></table>
+<p>Case1这样处理的原因：</p>
+<p>这样做的目的是将“Case 1”转换为“Case 2”、“Case 3”或“Case 4”，从而进行进一步的处理。对x的父节点进行左旋；左旋后，为了保持红黑树特性，就需要在左旋前“将x的兄弟节点设为黑色”，同时“将x的父节点设为红色”；左旋后，由于x的兄弟节点发生了变化，需要更新x的兄弟节点，从而进行后续处理。</p>
+<p><img src="/images/rb_tree_del_case1.jpg" alt="case1处理图"></p>
+<p>Case2这样处理的原因：</p>
+<p>这个情况的处理思想：是将“x中多余的一个黑色属性上移(往根方向移动)”。 x是“黑+黑”节点，我们将x由“黑+黑”节点 变成 “黑”节点，多余的一个“黑”属性移到x的父节点中，即x的父节点多出了一个黑属性(若x的父节点原先是“黑”，则此时变成了“黑+黑”；若x的父节点原先时“红”，则此时变成了“红+黑”)。 此时，需要注意的是：所有经过x的分支中黑节点个数没变化；但是，所有经过x的兄弟节点的分支中黑色节点的个数增加了1(因为x的父节点多了一个黑色属性)！为了解决这个问题，我们需要将“所有经过x的兄弟节点的分支中黑色节点的个数减1”即可，那么就可以通过“将x的兄弟节点由黑色变成红色”来实现。<br>      经过上面的步骤(将x的兄弟节点设为红色)，多余的一个颜色属性(黑色)已经跑到x的父节点中。我们需要将x的父节点设为“新的x节点”进行处理。若“新的x节点”是“黑+红”，直接将“新的x节点”设为黑色，即可完全解决该问题；若“新的x节点”是“黑+黑”，则需要对“新的x节点”进行进一步处理。</p>
+<p><img src="/images/rb_tree_del_case2.jpg" alt="case2处理图"></p>
+<p>Case3这样处理的原因：</p>
+<p>我们处理“Case 3”的目的是为了将“Case 3”进行转换，转换成“Case 4”,从而进行进一步的处理。转换的方式是对x的兄弟节点进行右旋；为了保证右旋后，它仍然是红黑树，就需要在右旋前“将x的兄弟节点的左孩子设为黑色”，同时“将x的兄弟节点设为红色”；右旋后，由于x的兄弟节点发生了变化，需要更新x的兄弟节点，从而进行后续处理。</p>
+<p><img src="/images/rb_tree_del_case3.jpg" alt="case3处理图"></p>
+<p>Case4这样处理的原因：</p>
+<p> 我们处理“Case 4”的目的是：去掉x中额外的黑色，将x变成单独的黑色。处理的方式是“：进行颜色修改，然后对x的父节点进行左旋。下面，我们来分析是如何实现的。<br>      为了便于说明，我们设置“当前节点”为S(Original Son)，“兄弟节点”为B(Brother)，“兄弟节点的左孩子”为BLS(Brother’s Left Son)，“兄弟节点的右孩子”为BRS(Brother’s Right Son)，“父节点”为F(Father)。<br>      我们要对F进行左旋。但在左旋前，我们需要调换F和B的颜色，并设置BRS为黑色。为什么需要这里处理呢？因为左旋后，F和BLS是父子关系，而我们已知BL是红色，如果F是红色，则违背了“特性(4)”；为了解决这一问题，我们将“F设置为黑色”。 但是，F设置为黑色之后，为了保证满足“特性(5)”，即为了保证左旋之后：<br>      第一，“同时经过根节点和S的分支的黑色节点个数不变”。<br>             若满足“第一”，只需要S丢弃它多余的颜色即可。因为S的颜色是“黑+黑”，而左旋后“同时经过根节点和S的分支的黑色节点个数”增加了1；现在，只需将S由“黑+黑”变成单独的“黑”节点，即可满足“第一”。<br>      第二，“同时经过根节点和BLS的分支的黑色节点数不变”。<br>             若满足“第二”，只需要将“F的原始颜色”赋值给B即可。之前，我们已经将“F设置为黑色”(即，将B的颜色”黑色”，赋值给了F)。至此，我们算是调换了F和B的颜色。<br>      第三，“同时经过根节点和BRS的分支的黑色节点数不变”。<br>             在“第二”已经满足的情况下，若要满足“第三”，只需要将BRS设置为“黑色”即可。<br>经过，上面的处理之后。红黑树的特性全部得到的满足！接着，我们将x设为根节点，就可以跳出while循环(参考伪代码)；即完成了全部处理。</p>
+<p>至此，我们就完成了Case 4的处理。理解Case 4的核心，是了解如何“去掉当前节点额外的黑色”。</p>
+<p><img src="/images/rb_tree_del_case4.jpg" alt="case4处理图"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BA%A2%E9%BB%91%E6%A0%91/" rel="tag"># 红黑树</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/15/Hyper%20&&%20Zsh/" rel="prev" title="Hyper && Zsh">
+      <i class="fa fa-chevron-left"></i> Hyper && Zsh
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/03/27/java-io/" rel="next" title="Java IO">
+      Java IO <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91"><span class="nav-number">1.</span> <span class="nav-text">二叉查找树</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E6%97%8B%E8%BD%AC"><span class="nav-number">3.</span> <span class="nav-text">红黑树的旋转</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A6%E6%97%8B"><span class="nav-number">3.1.</span> <span class="nav-text">左旋</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%B3%E6%97%8B"><span class="nav-number">3.2.</span> <span class="nav-text">右旋</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5"><span class="nav-number">4.</span> <span class="nav-text">红黑树的插入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">二叉查找树的插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5%E5%92%8C%E4%BF%AE%E5%A4%8D"><span class="nav-number">4.2.</span> <span class="nav-text">红黑树的插入和修复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">5.</span> <span class="nav-text">红黑树的删除</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">5.1.</span> <span class="nav-text">二叉查找树的删除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4%E5%92%8C%E4%BF%AE%E5%A4%8D"><span class="nav-number">5.2.</span> <span class="nav-text">红黑树的删除和修复</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4"><span class="nav-number">5.2.1.</span> <span class="nav-text">删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">5.2.2.</span> <span class="nav-text">修复</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jerry Lee</p>
+  <div class="site-description" itemprop="description">Java coder</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/sortbylist" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;sortbylist" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jerry Lee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
